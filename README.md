@@ -67,10 +67,15 @@ Built files are output to `artifacts/vybe-website/dist/public/`.
    | **Build output directory** | `artifacts/vybe-website/dist/public` |
    | **Root directory** | *(leave blank — use repo root)* |
 
-   > **Why `pages:build` instead of the plain build command?**
-   > This monorepo contains Replit-specific platform overrides in `pnpm-workspace.yaml` that cause `pnpm install --frozen-lockfile` (what Cloudflare runs automatically) to fail with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. The `pages:build` script runs `pnpm install --no-frozen-lockfile` first, bypassing that check, then builds the site.
+4. Under **Environment variables**, add:
 
-4. No environment variables are required for the build.
+   | Variable | Value |
+   |---|---|
+   | `SKIP_DEPENDENCY_INSTALL` | `true` |
+
+   > **Why these settings?**
+   > Cloudflare automatically runs `pnpm install --frozen-lockfile` before your build command. This monorepo has Replit-specific platform overrides in `pnpm-workspace.yaml` that cause that step to fail with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`.
+   > Setting `SKIP_DEPENDENCY_INSTALL=true` tells Cloudflare to skip its own install step. The `pages:build` script then runs `pnpm install --no-frozen-lockfile` itself before building.
 5. Click **Save and Deploy**.
 
 > Cloudflare Pages automatically handles SPA routing via the `_redirects` file and applies security/cache headers from the `_headers` file.
