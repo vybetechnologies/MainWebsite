@@ -63,9 +63,12 @@ Built files are output to `artifacts/vybe-website/dist/public/`.
    | Setting | Value |
    |---|---|
    | **Framework preset** | None |
-   | **Build command** | `pnpm --filter @workspace/vybe-website run build` |
+   | **Build command** | `pnpm run pages:build` |
    | **Build output directory** | `artifacts/vybe-website/dist/public` |
    | **Root directory** | *(leave blank — use repo root)* |
+
+   > **Why `pages:build` instead of the plain build command?**
+   > This monorepo contains Replit-specific platform overrides in `pnpm-workspace.yaml` that cause `pnpm install --frozen-lockfile` (what Cloudflare runs automatically) to fail with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. The `pages:build` script runs `pnpm install --no-frozen-lockfile` first, bypassing that check, then builds the site.
 
 4. No environment variables are required for the build.
 5. Click **Save and Deploy**.
