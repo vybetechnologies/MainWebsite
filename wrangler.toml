@@ -1,3 +1,0 @@
-name = "vybe-website"
-pages_build_output_dir = "artifacts/vybe-website/dist/public"
-compatibility_date = "2025-01-01"

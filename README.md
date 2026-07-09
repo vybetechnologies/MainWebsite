@@ -65,10 +65,10 @@ Built files are output to `artifacts/vybe-website/dist/public/`.
    | **Framework preset** | None |
    | **Build command** | `pnpm run build` |
    | **Build output directory** | `artifacts/vybe-website/dist/public` |
-   | **Deploy command** | *(leave blank — do not set this)* |
+   | **Deploy command** | `cd artifacts/vybe-website && npx wrangler pages deploy` |
    | **Root directory** | *(leave blank — use repo root)* |
 
-   > **Important:** Leave the **Deploy command** field empty. Cloudflare Pages with Git integration deploys automatically from the build output directory — `npx wrangler deploy` / `wrangler deploy` is for Cloudflare Workers, not Pages, and will cause an error if set here.
+   > **Important:** Use `npx wrangler pages deploy` (not `wrangler deploy` — that is for Workers). The `cd artifacts/vybe-website` prefix is required so wrangler finds the `wrangler.toml` inside the artifact directory rather than running from the monorepo root.
 5. Click **Save and Deploy**.
 
 > Cloudflare Pages automatically handles SPA routing via the `_redirects` file and applies security/cache headers from the `_headers` file.
