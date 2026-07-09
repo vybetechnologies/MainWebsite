@@ -63,19 +63,12 @@ Built files are output to `artifacts/vybe-website/dist/public/`.
    | Setting | Value |
    |---|---|
    | **Framework preset** | None |
-   | **Build command** | `pnpm run pages:build` |
+   | **Build command** | `pnpm run build` |
    | **Build output directory** | `artifacts/vybe-website/dist/public` |
+   | **Deploy command** | *(leave blank — do not set this)* |
    | **Root directory** | *(leave blank — use repo root)* |
 
-4. Under **Environment variables**, add:
-
-   | Variable | Value |
-   |---|---|
-   | `SKIP_DEPENDENCY_INSTALL` | `true` |
-
-   > **Why these settings?**
-   > Cloudflare automatically runs `pnpm install --frozen-lockfile` before your build command. This monorepo has Replit-specific platform overrides in `pnpm-workspace.yaml` that cause that step to fail with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`.
-   > Setting `SKIP_DEPENDENCY_INSTALL=true` tells Cloudflare to skip its own install step. The `pages:build` script then runs `pnpm install --no-frozen-lockfile` itself before building.
+   > **Important:** Leave the **Deploy command** field empty. Cloudflare Pages with Git integration deploys automatically from the build output directory — `npx wrangler deploy` / `wrangler deploy` is for Cloudflare Workers, not Pages, and will cause an error if set here.
 5. Click **Save and Deploy**.
 
 > Cloudflare Pages automatically handles SPA routing via the `_redirects` file and applies security/cache headers from the `_headers` file.
