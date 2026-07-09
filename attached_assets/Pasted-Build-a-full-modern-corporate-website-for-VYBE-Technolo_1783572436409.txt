@@ -1,0 +1,74 @@
+Build a full modern corporate website for VYBE Technologies Inc.
+
+Use this GitHub repo as the source of truth and commit/push all created files to:
+
+https://github.com/moneymase0926/VybeWebsite
+
+The website should feel like a legitimate corporate technology company, not a simple one-page landing page.
+
+Create a professional multi-section/multi-page style website with a modern dark tech aesthetic, responsive design, clean animations, and polished UI.
+
+Company positioning:
+VYBE Technologies provides mobile IT support, business technology management, cybersecurity setup, AI support, and home tech help for individuals, seniors, and small businesses.
+
+Required pages/sections:
+
+Home
+About VYBE Technologies
+Services
+Business Technology Management
+VYBE Tech Rescue
+VYBE Home Tech Care
+Cybersecurity & Scam Protection
+AI Setup & Training
+Pricing
+Contact / Book Service
+Services to include:
+
+Slow computer repair
+On-site tech support
+Remote support
+Wi-Fi and internet troubleshooting
+Printer setup and repair
+Email and password help
+New computer/device setup
+Data transfer and backup
+Scam cleanup and prevention
+Basic cybersecurity setup
+Microsoft 365 / Google Workspace support
+AI tools setup and training
+Small business managed tech support
+Brand style:
+
+Corporate, modern, trustworthy
+Dark background with blue/purple tech accents
+Clean cards, gradients, professional typography
+Mobile-first responsive design
+Strong call-to-action buttons
+Professional but approachable language
+Pricing section:
+Include starter pricing examples:
+
+Tech Rescue Visit: $99 diagnostic + first hour
+Extra time: $30 per half hour
+VYBE Home Tech Care: starting at $49/month
+Business Tech Management: starting at $299/month
+Add disclaimer: “Final pricing may vary based on location, complexity, and business needs.”
+Contact section:
+Include placeholder phone/email for now:
+
+Phone: Coming Soon
+Email: support@vybetechnologies.net
+Location: Fargo, North Dakota
+Technical requirements:
+
+Use React with Vite if starting from scratch.
+Use clean component structure.
+Use CSS or Tailwind, whichever is fastest and cleanest.
+Make it deployable immediately.
+Include README.md with setup and deployment instructions.
+Add SEO metadata.
+Add favicon placeholder if possible.
+Commit all files to the GitHub repo.
+Do not leave the project half-built.
+Make the site production-ready and visually polished.
