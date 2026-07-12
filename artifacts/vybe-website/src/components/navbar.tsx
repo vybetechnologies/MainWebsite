@@ -1,8 +1,37 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X, Phone, ShoppingCart, LogIn, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CONTACT } from '@/lib/contact-info';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+
+function ComingSoonButton({
+  icon,
+  label,
+  className = '',
+}: {
+  icon: ReactNode;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          aria-label={`${label} (coming soon)`}
+          className={`flex items-center gap-1.5 text-sm font-medium text-muted-foreground/50 cursor-not-allowed opacity-60 ${className}`}
+        >
+          {icon}
+          <span>{label}</span>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Coming soon</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function Navbar() {
   const [location] = useLocation();
@@ -52,6 +81,26 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          <div className="flex items-center gap-4 pl-2 border-l border-border/60">
+            <ComingSoonButton icon={<LogIn className="w-4 h-4" />} label="Log In" />
+            <ComingSoonButton icon={<UserPlus className="w-4 h-4" />} label="Sign Up" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  aria-label="Cart (coming soon)"
+                  className="text-muted-foreground/50 cursor-not-allowed opacity-60"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Coming soon</TooltipContent>
+            </Tooltip>
+          </div>
+
           <Link 
             href="/contact" 
             className="px-5 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-300 text-sm shadow-[0_0_15px_-3px_hsl(var(--primary)/0.3)] hover:shadow-[0_0_20px_0_hsl(var(--primary)/0.5)]"
@@ -91,6 +140,26 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              <div className="flex items-center justify-center gap-6">
+                <ComingSoonButton icon={<LogIn className="w-4 h-4" />} label="Log In" />
+                <ComingSoonButton icon={<UserPlus className="w-4 h-4" />} label="Sign Up" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      disabled
+                      aria-disabled="true"
+                      aria-label="Cart (coming soon)"
+                      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground/50 cursor-not-allowed opacity-60"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Cart</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Coming soon</TooltipContent>
+                </Tooltip>
+              </div>
+
               <div className="mt-auto pt-6 border-t border-border flex flex-col gap-4">
                 <Link 
                   href="/contact" 
