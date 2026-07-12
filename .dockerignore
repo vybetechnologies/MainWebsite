@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+.git
+.local
+.agents
+attached_assets
+screenshots
+artifacts/vybe-website/dist
+artifacts/mockup-sandbox/dist
+*.log

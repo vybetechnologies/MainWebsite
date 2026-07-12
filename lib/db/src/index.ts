@@ -10,7 +10,17 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Neon (and most managed Postgres providers) require TLS. node-postgres does
+// not always infer this from `sslmode=require` in the URL, so make it explicit.
+const useSsl =
+  process.env.DATABASE_URL.includes("sslmode=require") ||
+  process.env.DATABASE_URL.includes("neon.tech") ||
+  process.env.NODE_ENV === "production";
+
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: useSsl ? { rejectUnauthorized: true } : undefined,
+});
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
