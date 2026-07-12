@@ -1,0 +1,3 @@
+- [Fly.io deploy gotchas](fly-io-deploy.md) — Fly needs billing info before first app create; it does not auto-inject PORT, set it explicitly in fly.toml [env].
+- [Git push auth vs GitHub connector](git-push-vs-github-connector.md) — reconnecting the generic GitHub connector does not fix git push auth; use a PAT for direct pushes when the Replit git-remote credential is broken.
+- [pnpm monorepo Docker builds](pnpm-monorepo-docker.md) — workspace libs exported as ./src/*.ts get bundled by esbuild directly from source, so Docker only needs full repo context + pnpm install + build; no separate lib build stage needed.
