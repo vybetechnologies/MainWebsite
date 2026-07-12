@@ -1,5 +1,5 @@
 import { SEO } from '@/components/seo';
-import { ShieldCheck, HeartHandshake, Zap, Award } from 'lucide-react';
+import { ShieldCheck, HeartHandshake, Zap, Award, BadgeCheck } from 'lucide-react';
 
 export default function About() {
   return (
@@ -116,6 +116,15 @@ export default function About() {
               <div>
                 <h4 className="text-xl font-bold mb-2">Security First</h4>
                 <p className="text-muted-foreground">Every action we take keeps your digital safety in mind, protecting you from modern scams and threats.</p>
+              </div>
+            </div>
+            <div className="flex gap-6">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <BadgeCheck className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2">Registered & Insured</h4>
+                <p className="text-muted-foreground">We operate as a fully registered business, and our work is insured for your protection and peace of mind.</p>
               </div>
             </div>
           </div>

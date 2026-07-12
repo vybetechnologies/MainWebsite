@@ -1,5 +1,5 @@
 import { SEO } from '@/components/seo';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, MapPin, Phone, BadgeCheck } from 'lucide-react';
 import { useState } from 'react';
 import { CONTACT } from '@/lib/contact-info';
 
@@ -76,6 +76,16 @@ export default function Contact() {
                   <div>
                     <h4 className="font-bold text-lg mb-1">Mailing Address</h4>
                     <p className="text-muted-foreground">{CONTACT.addressLine1}<br/>{CONTACT.addressLine2}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                    <BadgeCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg mb-1">Registered & Insured</h4>
+                    <p className="text-muted-foreground">Book with confidence knowing we're a registered, insured business.</p>
                   </div>
                 </div>
               </div>

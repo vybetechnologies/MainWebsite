@@ -1,6 +1,6 @@
 import { SEO } from '@/components/seo';
 import { Link } from 'wouter';
-import { ArrowRight, ShieldCheck, HeartHandshake, Zap, Clock, Star } from 'lucide-react';
+import { ArrowRight, ShieldCheck, HeartHandshake, Zap, Clock, Star, BadgeCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Home() {
@@ -66,7 +66,7 @@ export default function Home() {
       {/* Value Props Strip */}
       <section className="border-y border-border bg-card/50 backdrop-blur-sm relative z-20">
         <div className="container mx-auto px-6 md:px-12 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 divide-y md:divide-y-0 md:divide-x divide-border">
             <div className="flex items-center gap-4 md:px-6 pt-4 md:pt-0">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <HeartHandshake className="w-6 h-6 text-primary" />
@@ -83,6 +83,15 @@ export default function Home() {
               <div>
                 <h3 className="font-display font-semibold text-lg">Trusted & Secure</h3>
                 <p className="text-sm text-muted-foreground">Premium cybersecurity included</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 md:px-6 pt-6 md:pt-0">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <BadgeCheck className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-display font-semibold text-lg">Registered & Insured</h3>
+                <p className="text-sm text-muted-foreground">Work with total peace of mind</p>
               </div>
             </div>
             <div className="flex items-center gap-4 md:px-6 pt-6 md:pt-0">

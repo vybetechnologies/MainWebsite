@@ -19,6 +19,7 @@ export function Footer() {
             <p className="text-muted-foreground leading-relaxed">
               Trusted, approachable tech support for individuals, seniors, and small businesses. We come to you, solving tech headaches without the jargon.
             </p>
+            <p className="text-sm text-primary font-medium">Registered & Insured</p>
           </div>
 
           <div>
