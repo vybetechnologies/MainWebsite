@@ -1,7 +1,8 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Menu, X, Shield, Phone } from 'lucide-react';
+import { Menu, X, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CONTACT } from '@/lib/contact-info';
 
 export function Navbar() {
   const [location] = useLocation();
@@ -30,10 +31,8 @@ export function Navbar() {
       }`}
     >
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 z-50 group">
-          <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/50 group-hover:bg-primary/30 transition-colors">
-            <Shield className="w-5 h-5 text-primary" />
-          </div>
+        <Link href="/" className="flex items-center gap-2.5 z-50 group">
+          <img src="/logo-mark.png" alt="" className="h-8 w-auto" />
           <span className="font-display font-bold text-xl tracking-wide">
             <span className="text-primary">VYBE</span>
             <span className="text-muted-foreground ml-1.5 font-medium text-sm uppercase tracking-widest">Technologies</span>
@@ -100,10 +99,10 @@ export function Navbar() {
                 >
                   Book a Service
                 </Link>
-                <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm">
+                <a href={`tel:${CONTACT.phoneTel}`} className="flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-primary transition-colors">
                   <Phone className="w-4 h-4" />
-                  <span>Serving Fargo, ND</span>
-                </div>
+                  <span>{CONTACT.phoneDisplay}</span>
+                </a>
               </div>
             </motion.div>
           )}

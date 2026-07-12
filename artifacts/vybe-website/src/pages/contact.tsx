@@ -1,6 +1,7 @@
 import { SEO } from '@/components/seo';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { useState } from 'react';
+import { CONTACT } from '@/lib/contact-info';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -50,7 +51,9 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-bold text-lg mb-1">Phone</h4>
-                    <p className="text-muted-foreground">Coming Soon</p>
+                    <a href={`tel:${CONTACT.phoneTel}`} className="text-muted-foreground hover:text-primary transition-colors">
+                      {CONTACT.phoneDisplay}
+                    </a>
                   </div>
                 </div>
                 
@@ -60,9 +63,19 @@ export default function Contact() {
                   </div>
                   <div>
                     <h4 className="font-bold text-lg mb-1">Email</h4>
-                    <a href="mailto:support@vybetechnologies.net" className="text-muted-foreground hover:text-primary transition-colors">
-                      support@vybetechnologies.net
+                    <a href={`mailto:${CONTACT.email}`} className="text-muted-foreground hover:text-primary transition-colors">
+                      {CONTACT.email}
                     </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg mb-1">Mailing Address</h4>
+                    <p className="text-muted-foreground">{CONTACT.addressLine1}<br/>{CONTACT.addressLine2}</p>
                   </div>
                 </div>
               </div>

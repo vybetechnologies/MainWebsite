@@ -1,5 +1,6 @@
 import { Link } from 'wouter';
-import { Shield, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
+import { CONTACT } from '@/lib/contact-info';
 
 export function Footer() {
   return (
@@ -8,10 +9,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
           
           <div className="flex flex-col gap-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/50 group-hover:bg-primary/30 transition-colors">
-                <Shield className="w-5 h-5 text-primary" />
-              </div>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <img src="/logo-mark.png" alt="" className="h-9 w-auto" />
               <span className="font-display font-bold text-xl tracking-wide">
                 <span className="text-primary">VYBE</span>
                 <span className="text-muted-foreground ml-1.5 font-medium text-sm uppercase tracking-widest">Technologies</span>
@@ -74,16 +73,18 @@ export function Footer() {
             <ul className="flex flex-col gap-4 text-muted-foreground">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span>Fargo, North Dakota<br/>(We come to you)</span>
+                <span>{CONTACT.addressLine1}<br/>{CONTACT.addressLine2}<br/><span className="text-sm">(We come to you)</span></span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span>Coming Soon</span>
+                <a href={`tel:${CONTACT.phoneTel}`} className="hover:text-primary transition-colors">
+                  {CONTACT.phoneDisplay}
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <a href="mailto:support@vybetechnologies.net" className="hover:text-primary transition-colors">
-                  support@vybetechnologies.net
+                <a href={`mailto:${CONTACT.email}`} className="hover:text-primary transition-colors">
+                  {CONTACT.email}
                 </a>
               </li>
             </ul>
