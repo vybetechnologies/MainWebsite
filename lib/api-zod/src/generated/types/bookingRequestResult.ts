@@ -6,6 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export * from './bookingRequestInput';
-export * from './bookingRequestResult';
-export * from './healthStatus';
+export interface BookingRequestResult {
+  success: boolean;
+}

@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: booking
+    description: Booking / contact request operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /booking-requests:
+    post:
+      operationId: createBookingRequest
+      tags: [booking]
+      summary: Submit a booking / contact request
+      description: Sends a booking request email to the business via Resend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingRequestInput"
+      responses:
+        "201":
+          description: Booking request sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingRequestResult"
+        "400":
+          description: Invalid request body
+        "502":
+          description: Failed to send booking request email
 components:
   schemas:
     HealthStatus:
@@ -33,4 +58,38 @@ components:
           type: string
       required:
         - status
+    BookingRequestInput:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - service
+        - message
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 3
+          pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+        phone:
+          type: string
+        service:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+    BookingRequestResult:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
 

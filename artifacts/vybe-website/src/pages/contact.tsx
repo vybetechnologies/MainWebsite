@@ -2,14 +2,49 @@ import { SEO } from '@/components/seo';
 import { Mail, MapPin, Phone, BadgeCheck } from 'lucide-react';
 import { useState } from 'react';
 import { CONTACT } from '@/lib/contact-info';
+import { useCreateBookingRequest } from '@workspace/api-client-react';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const bookingRequest = useCreateBookingRequest();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // No backend per brief, just simulate success
-    setSubmitted(true);
+    setErrorMessage(null);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const firstName = String(formData.get('firstName') ?? '').trim();
+    const lastName = String(formData.get('lastName') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim();
+    const phone = String(formData.get('phone') ?? '').trim();
+    const service = String(formData.get('service') ?? '').trim();
+    const message = String(formData.get('message') ?? '').trim();
+
+    bookingRequest.mutate(
+      {
+        data: {
+          firstName,
+          lastName,
+          email,
+          ...(phone ? { phone } : {}),
+          service,
+          message,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSubmitted(true);
+          form.reset();
+        },
+        onError: () => {
+          setErrorMessage(
+            "Something went wrong sending your request. Please try again or call us directly."
+          );
+        },
+      }
+    );
   };
 
   return (
@@ -112,27 +147,27 @@ export default function Contact() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">First Name</label>
-                      <input required type="text" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="Jane" />
+                      <input name="firstName" required type="text" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="Jane" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Last Name</label>
-                      <input required type="text" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="Doe" />
+                      <input name="lastName" required type="text" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="Doe" />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Email</label>
-                    <input required type="email" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="jane@example.com" />
+                    <input name="email" required type="email" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="jane@example.com" />
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Phone</label>
-                    <input type="tel" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="(555) 123-4567" />
+                    <input name="phone" type="tel" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="(555) 123-4567" />
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Service Needed</label>
-                    <select className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none">
+                    <select name="service" className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all appearance-none">
                       <option>Tech Rescue (One-off fix)</option>
                       <option>Home Tech Care Subscription</option>
                       <option>Business IT Management</option>
@@ -144,11 +179,19 @@ export default function Contact() {
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Describe your issue</label>
-                    <textarea required rows={4} className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none" placeholder="Tell us what's going on..."></textarea>
+                    <textarea name="message" required rows={4} className="w-full bg-background border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none" placeholder="Tell us what's going on..."></textarea>
                   </div>
-                  
-                  <button type="submit" className="w-full py-4 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-all shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)]">
-                    Send Request
+
+                  {errorMessage && (
+                    <p className="text-sm text-red-500">{errorMessage}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={bookingRequest.isPending}
+                    className="w-full py-4 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-all shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {bookingRequest.isPending ? 'Sending...' : 'Send Request'}
                   </button>
                 </form>
               )}
