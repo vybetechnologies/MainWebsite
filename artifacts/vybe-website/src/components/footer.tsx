@@ -101,8 +101,8 @@ export function Footer() {
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} VYBE Technologies Inc. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/contact" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

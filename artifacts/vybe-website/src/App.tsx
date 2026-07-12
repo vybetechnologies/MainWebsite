@@ -16,6 +16,8 @@ import Cybersecurity from '@/pages/cybersecurity';
 import AISetup from '@/pages/ai-setup';
 import Pricing from '@/pages/pricing';
 import Contact from '@/pages/contact';
+import Terms from '@/pages/terms';
+import Privacy from '@/pages/privacy';
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,8 @@ function Router() {
       <Route path="/services/ai-setup" component={AISetup} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/contact" component={Contact} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
       <Route component={NotFound} />
     </Switch>
   );
