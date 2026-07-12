@@ -1,4 +1,5 @@
 import { SEO } from '@/components/seo';
+import { Partners } from '@/components/partners';
 import { Link } from 'wouter';
 import { ArrowRight, ShieldCheck, HeartHandshake, Zap, Clock, Star, BadgeCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -106,6 +107,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Partners />
 
       {/* Main Services Teaser */}
       <section className="py-24 md:py-32 relative">
