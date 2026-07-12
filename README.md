@@ -77,6 +77,31 @@ Built files are output to `artifacts/vybe-website/dist/public/`.
 
 After deploying, assign your domain (`vybetechnologies.net`) in the Cloudflare Pages dashboard under **Custom domains**.
 
+## Production Infrastructure
+
+This project runs entirely on non-Replit infrastructure in production. Replit is used only as the development environment.
+
+| Layer | Provider | Notes |
+|---|---|---|
+| Frontend (`artifacts/vybe-website`) | **Cloudflare Pages** | Deployed via Git integration (see above). Live at `vybetechnologies.net`. |
+| API (`artifacts/api-server`) | **Fly.io** | App name `vybe-api-server`, deployed via `Dockerfile` + `fly.toml` at the repo root. Live at `https://vybe-api-server.fly.dev`. |
+| Database (`lib/db`) | **Neon.tech** | Serverless Postgres. Connection string stored as the `DATABASE_URL` secret on Fly, and as `NEON_DATABASE_URL` for local/dev use. |
+| Source control | **GitHub** | `vybetechnologies/MainWebsite`, branch `main`. |
+| CI/CD | **GitHub Actions** | `.github/workflows/fly-deploy.yml` redeploys the API server to Fly on every push to `main` that touches `artifacts/api-server`, `lib/`, `Dockerfile`, or `fly.toml`. Requires a `FLY_API_TOKEN` secret configured in the GitHub repo's Actions secrets. |
+
+### Deploying the API server manually
+
+```bash
+# from the repo root
+fly deploy --config fly.toml --remote-only
+```
+
+Requires `flyctl` installed and authenticated (`fly auth login`, or `FLY_API_TOKEN` in the environment), and a `DATABASE_URL` secret already set on the Fly app:
+
+```bash
+fly secrets set DATABASE_URL="<your Neon connection string>" --app vybe-api-server
+```
+
 ## Project Structure
 
 ```
