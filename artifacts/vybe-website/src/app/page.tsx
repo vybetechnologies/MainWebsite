@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { buildMetadata } from '@/lib/seo';
 import {
   Sparkles,
   ShieldCheck,
@@ -144,6 +145,13 @@ const BUSINESS_SOLUTIONS = [
     description: 'Strategic guidance for organizations planning their next technology move.',
   },
 ];
+
+export const metadata = buildMetadata({
+  title: 'VYBE Technologies | Technology built around real life.',
+  description:
+    'VYBE Technologies creates digital products, business solutions, and human-centered technology services designed to make life simpler, safer, and more connected.',
+  path: '/',
+});
 
 export default async function Home() {
   const latestArticles = await getLatestNewsArticles(3);

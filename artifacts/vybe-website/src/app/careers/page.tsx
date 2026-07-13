@@ -1,13 +1,14 @@
-import type { Metadata } from 'next';
 import { Heart, Rocket, ShieldCheck, GraduationCap, HeartPulse, CalendarClock } from 'lucide-react';
 import { Hero } from '@/components/shared/hero';
 import { ServiceCard } from '@/components/shared/service-card';
 import { CareersInterestForm } from '@/components/careers/interest-form';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'Careers',
   description: 'Careers, culture, and open roles at VYBE Technologies in Fargo, North Dakota.',
-};
+  path: '/careers',
+});
 
 const PRINCIPLES = [
   { icon: Heart, title: 'People First', description: 'We treat teammates the way we ask them to treat customers.' },

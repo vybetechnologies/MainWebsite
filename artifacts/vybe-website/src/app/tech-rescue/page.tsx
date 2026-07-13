@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import {
   Laptop,
   Smartphone,
@@ -21,12 +20,14 @@ import { Hero } from '@/components/shared/hero';
 import { ServiceCard } from '@/components/shared/service-card';
 import { CONTACT } from '@/lib/contact-info';
 import { BookingForm } from '@/components/tech-rescue/booking-form';
+import { buildMetadata, techRescueLocalBusinessJsonLd } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'Tech Rescue',
   description:
     'Book on-demand tech support with VYBE Technologies Tech Rescue — computers, phones, gaming devices, home and business technology, on-site or remote.',
-};
+  path: '/tech-rescue',
+});
 
 const SERVICE_CATEGORIES = [
   { icon: Laptop, title: 'Computers', description: 'Slow performance, viruses, crashes, upgrades, and everyday troubleshooting.' },
@@ -56,6 +57,11 @@ const TRUST_SIGNALS = [
 export default function TechRescuePage() {
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(techRescueLocalBusinessJsonLd()) }}
+      />
       <Hero
         eyebrow="Tech Rescue"
         title="Technology problems, rescued."

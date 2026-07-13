@@ -74,12 +74,13 @@
   --popover-foreground: 210 30% 97%;
   --popover-border: 240 22% 14%;
 
-  /* Signature violet */
-  --primary: 262 83% 66%;
+  /* Signature violet — lightness tuned to 62% (from 66%) so white text on a
+     solid primary button clears WCAG AA (4.5:1) for normal-weight text. */
+  --primary: 262 83% 62%;
   --primary-foreground: 0 0% 100%;
 
-  /* Electric blue */
-  --secondary: 221 90% 60%;
+  /* Electric blue — lightness tuned to 57% (from 60%) for the same reason. */
+  --secondary: 221 90% 57%;
   --secondary-foreground: 0 0% 100%;
 
   /* Cyan accent, used for gradients + highlights */
@@ -172,6 +173,17 @@
   background: color-mix(in srgb, hsl(var(--background)) 72%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+/* Visible keyboard focus ring on every interactive element. Tailwind v4's
+   preflight does not remove the native outline, but we standardize its
+   appearance so focus is always obvious against the dark theme. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
 import { CheckCircle2, Laptop, ShieldCheck, Sparkles, Building2, Network, Users2, HeartHandshake, Wifi, GraduationCap } from 'lucide-react';
 import { CtaPanel } from '@/components/shared/cta-panel';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'Solutions',
   description:
     'Technology solutions from VYBE Technologies for individuals, businesses, and communities — device repair, managed IT, cybersecurity, and community technology access.',
-};
+  path: '/solutions',
+});
 
 interface SolutionItem {
   icon: typeof Laptop;

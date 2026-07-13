@@ -37,6 +37,9 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     links: [
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Terms of Service', href: '/terms' },
+      { label: 'Accessibility', href: '/accessibility' },
+      { label: 'Security', href: '/security' },
+      { label: 'Legal Notices', href: '/legal-notices' },
     ],
   },
 ];
@@ -135,12 +138,18 @@ export function Footer() {
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} VYBE Technologies Inc. All rights reserved.</p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-6">
             <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">
               Terms of Service
+            </Link>
+            <Link href="/accessibility" className="hover:text-foreground transition-colors">
+              Accessibility
+            </Link>
+            <Link href="/legal-notices" className="hover:text-foreground transition-colors">
+              Legal Notices
             </Link>
           </div>
         </div>

@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import {
   Heart,
   Rocket,
@@ -16,12 +15,14 @@ import { ServiceCard } from '@/components/shared/service-card';
 import { TeamCard } from '@/components/shared/team-card';
 import { CtaPanel } from '@/components/shared/cta-panel';
 import { CONTACT } from '@/lib/contact-info';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'About',
   description:
     'Learn about VYBE Technologies — our mission, values, and commitment to North Dakota, headquartered in Fargo.',
-};
+  path: '/about',
+});
 
 const VALUES = [
   { icon: Heart, title: 'People First', description: 'Every decision starts with the person on the other side of it.' },

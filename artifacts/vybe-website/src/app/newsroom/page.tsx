@@ -1,16 +1,17 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Download, Mail, Phone } from 'lucide-react';
 import { Hero } from '@/components/shared/hero';
 import { CONTACT } from '@/lib/contact-info';
 import { getAllNewsArticles } from '@/lib/sanity/queries';
 import { NewsroomFilter } from './newsroom-filter';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'Newsroom',
   description:
     'Press releases, product announcements, company news, and community initiatives from VYBE Technologies.',
-};
+  path: '/newsroom',
+});
 
 const BRAND_ASSETS = [
   { label: 'VYBE Logo Mark (PNG)', href: '/logo-mark.png' },

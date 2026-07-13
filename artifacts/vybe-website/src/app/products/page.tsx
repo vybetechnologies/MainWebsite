@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Users2,
@@ -13,12 +12,14 @@ import {
 import { ProductCard } from '@/components/shared/product-card';
 import { StatusBadge, type ProductStatus } from '@/components/shared/status-badge';
 import { CtaPanel } from '@/components/shared/cta-panel';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'Products',
   description:
     "Explore the VYBE Technologies product ecosystem — VYBE Circle, VYBE Key, VYBE Mail, VYBE Sound, VYBE TV, VYBE ID, and VYBE HUB.",
-};
+  path: '/products',
+});
 
 interface Product {
   id: string;

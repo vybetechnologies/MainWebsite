@@ -9,6 +9,7 @@ import { urlForImage } from '@/lib/sanity/image';
 import { getNewsArticleBySlug, getNewsArticleSlugs } from '@/lib/sanity/queries';
 import { NEWS_CATEGORY_LABELS } from '@/lib/sanity/types';
 import { formatArticleDateLong } from '@/lib/sanity/format-date';
+import { buildMetadata } from '@/lib/seo';
 
 export async function generateStaticParams() {
   const slugs = await getNewsArticleSlugs();
@@ -23,10 +24,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = await getNewsArticleBySlug(slug);
   if (!article) return {};
-  return {
+  const image = article.mainImage ? urlForImage(article.mainImage).width(1200).height(630).url() : undefined;
+  return buildMetadata({
     title: article.title,
     description: article.summary,
-  };
+    path: `/newsroom/${slug}`,
+    type: 'article',
+    ...(image ? { image } : {}),
+  });
 }
 
 export default async function NewsArticlePage({
