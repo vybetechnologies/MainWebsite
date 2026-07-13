@@ -1,11 +1,10 @@
 'use client';
 
-import { SignUp } from '@clerk/react';
+import dynamic from 'next/dynamic';
+
+// See staff/page.tsx — Clerk components must skip server prerendering.
+const SignUpContent = dynamic(() => import('./sign-up-content'), { ssr: false });
 
 export default function StaffSignUpPage() {
-  return (
-    <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <SignUp routing="hash" signInUrl="/staff/sign-in" fallbackRedirectUrl="/staff/" />
-    </div>
-  );
+  return <SignUpContent />;
 }
