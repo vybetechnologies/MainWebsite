@@ -11,10 +11,15 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @workspace/api-server run build
 
 FROM node:22-slim AS runtime
-WORKDIR /app
+WORKDIR /repo
 ENV NODE_ENV=production
 
-COPY --from=build /repo/artifacts/api-server/dist ./dist
+# esbuild externalizes a few packages that can't be safely bundled (see build.mjs).
+# Preserve the pnpm node_modules layout (root store + workspace symlinks) so those
+# externalized imports (e.g. @google-cloud/storage) still resolve at runtime.
+COPY --from=build /repo/node_modules ./node_modules
+COPY --from=build /repo/artifacts/api-server/node_modules ./artifacts/api-server/node_modules
+COPY --from=build /repo/artifacts/api-server/dist ./artifacts/api-server/dist
 
 EXPOSE 8080
-CMD ["node", "--enable-source-maps", "./dist/index.mjs"]
+CMD ["node", "--enable-source-maps", "./artifacts/api-server/dist/index.mjs"]
