@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 
 /**
- * Canonical production URL. Override with NEXT_PUBLIC_SITE_URL if the site
- * is ever served from a different domain (e.g. a staging environment).
+ * Canonical production URL. Confirmed with the client as the real launch
+ * domain (2026-07-13). Override with NEXT_PUBLIC_SITE_URL if the site is
+ * ever served from a different domain (e.g. a staging environment).
  */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://vybetechnologies.net').replace(
   /\/+$/,
