@@ -151,6 +151,9 @@ export function Footer() {
             <Link href="/legal-notices" className="hover:text-foreground transition-colors">
               Legal Notices
             </Link>
+            <Link href="/staff" className="hover:text-foreground transition-colors">
+              Staff Login
+            </Link>
           </div>
         </div>
       </div>

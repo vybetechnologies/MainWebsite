@@ -21,6 +21,7 @@ import type {
 
 import type {
   BookingRequestInput,
+  BookingRequestListResponse,
   BookingRequestResult,
   ErrorEnvelope,
   HealthStatus,
@@ -204,6 +205,85 @@ export const useCreateBookingRequest = <TError = ErrorType<void>,
       > => {
       return useMutation(getCreateBookingRequestMutationOptions(options));
     }
+
+export const getListBookingRequestsUrl = () => {
+
+
+
+
+  return `/api/booking-requests`
+}
+
+/**
+ * Staff-only. Returns the most recent submissions, newest first.
+ * Requires a signed-in Clerk session for an allow-listed staff email.
+ * @summary List submitted booking / contact / careers requests
+ */
+export const listBookingRequests = async ( options?: RequestInit): Promise<BookingRequestListResponse> => {
+
+  return customFetch<BookingRequestListResponse>(getListBookingRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListBookingRequestsQueryKey = () => {
+    return [
+    `/api/booking-requests`
+    ] as const;
+    }
+
+
+export const getListBookingRequestsQueryOptions = <TData = Awaited<ReturnType<typeof listBookingRequests>>, TError = ErrorType<ErrorEnvelope>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBookingRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListBookingRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBookingRequests>>> = ({ signal }) => listBookingRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBookingRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListBookingRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof listBookingRequests>>>
+export type ListBookingRequestsQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary List submitted booking / contact / careers requests
+ */
+
+export function useListBookingRequests<TData = Awaited<ReturnType<typeof listBookingRequests>>, TError = ErrorType<ErrorEnvelope>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBookingRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListBookingRequestsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getRequestUploadUrlUrl = () => {
 

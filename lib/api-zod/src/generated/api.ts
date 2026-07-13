@@ -51,6 +51,41 @@ export const CreateBookingRequestResponse = zod.object({
 
 
 /**
+ * Staff-only. Returns the most recent submissions, newest first.
+ * Requires a signed-in Clerk session for an allow-listed staff email.
+ * @summary List submitted booking / contact / careers requests
+ */
+
+
+export const listBookingRequestsResponseRequestsItemOneEmailMin = 3;
+
+
+export const listBookingRequestsResponseRequestsItemOneEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+
+
+
+
+export const ListBookingRequestsResponse = zod.object({
+  "requests": zod.array(zod.object({
+  "firstName": zod.string().min(1),
+  "lastName": zod.string().min(1),
+  "email": zod.string().min(listBookingRequestsResponseRequestsItemOneEmailMin).regex(listBookingRequestsResponseRequestsItemOneEmailRegExp),
+  "phone": zod.string().optional(),
+  "service": zod.string().min(1),
+  "message": zod.string().min(1),
+  "deviceType": zod.string().optional().describe('e.g. Computer, Phone\/Tablet, Gaming Device, Home Technology, Business Technology'),
+  "brandModel": zod.string().optional().describe('Device brand and model, if known.'),
+  "preferredServiceType": zod.string().optional().describe('e.g. On-Site Support, Drop-Off, Remote Support'),
+  "preferredDate": zod.string().optional().describe('Customer\'s preferred appointment date (free-text\/ISO date).'),
+  "photoObjectPath": zod.string().optional().describe('Object storage path of an optionally attached photo (from the upload-url flow).')
+}).and(zod.object({
+  "id": zod.string(),
+  "createdAt": zod.coerce.date()
+})))
+})
+
+
+/**
  * Returns a presigned GCS URL for direct upload. The client sends JSON
  * metadata here, then uploads the file directly to the returned URL.
  * @summary Request a presigned URL for file upload

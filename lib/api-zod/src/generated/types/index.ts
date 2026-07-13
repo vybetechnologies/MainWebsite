@@ -7,6 +7,8 @@
  */
 
 export * from './bookingRequestInput';
+export * from './bookingRequestListResponse';
+export * from './bookingRequestRecord';
 export * from './bookingRequestResult';
 export * from './errorEnvelope';
 export * from './healthStatus';

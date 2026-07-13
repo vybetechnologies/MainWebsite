@@ -51,6 +51,34 @@ paths:
           description: Invalid request body
         "502":
           description: Failed to send booking request email
+    get:
+      operationId: listBookingRequests
+      tags: [booking]
+      summary: List submitted booking / contact / careers requests
+      description: |
+        Staff-only. Returns the most recent submissions, newest first.
+        Requires a signed-in Clerk session for an allow-listed staff email.
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: List of booking requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingRequestListResponse"
+        "401":
+          description: Not signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Signed in but not an authorized staff member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /storage/uploads/request-url:
     post:
       tags: [Storage]
@@ -246,4 +274,28 @@ components:
       properties:
         error:
           type: string
+    BookingRequestRecord:
+      allOf:
+        - $ref: "#/components/schemas/BookingRequestInput"
+        - type: object
+          required: [id, createdAt]
+          properties:
+            id:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+    BookingRequestListResponse:
+      type: object
+      required: [requests]
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: "#/components/schemas/BookingRequestRecord"
+  securitySchemes:
+    clerkAuth:
+      type: http
+      scheme: bearer
+      description: "Clerk session token, sent as an Authorization: Bearer header."
 

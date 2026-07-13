@@ -70,3 +70,12 @@ export interface ErrorEnvelope {
   error: string;
 }
 
+export type BookingRequestRecord = BookingRequestInput & {
+  id: string;
+  createdAt: string;
+};
+
+export interface BookingRequestListResponse {
+  requests: BookingRequestRecord[];
+}
+
