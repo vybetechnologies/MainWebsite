@@ -1,0 +1,685 @@
+VYBE Technologies Corporate Website Plan
+
+VYBE Technologies Corporate Website
+
+1. Core Goal
+
+Build a polished corporate website that positions VYBE Technologies as a credible, modern technology company with multiple products, services, and future-facing initiatives.
+
+The site should feel larger than a local repair business while still making current services easy to understand and purchase.
+
+Primary message:
+
+Technology that works for people.
+
+Secondary message:
+
+From everyday support to ambitious digital platforms, VYBE builds practical technology for a connected world.
+
+⸻
+
+2. Brand Direction
+
+Overall Style
+
+* Modern technology company
+* Clean, premium, and confident
+* Dark interface with luminous gradients
+* Minimal but not empty
+* Friendly rather than overly corporate
+* Futuristic without looking like a gaming website
+* Strong visual consistency with the VYBE double-V identity
+
+Suggested Colors
+
+* Near-black background: #07090D
+* Dark navy panels: #101522
+* Electric violet: #7A5CFF
+* Bright cyan: #22D3EE
+* Soft blue: #4F8CFF
+* White text: #F7F9FC
+* Muted text: #9AA6B5
+* Success green: #38D996
+
+Typography
+
+Use:
+
+* Space Grotesk, Sora, or Manrope for headings
+* Inter for body text
+
+Headlines should be bold, wide, and confident.
+
+⸻
+
+3. Site Structure
+
+Main Navigation
+
+* Home
+* Solutions
+* Products
+* Tech Rescue
+* About
+* Newsroom
+* Careers
+* Contact
+
+Right-side navigation actions:
+
+* Client Support
+* Get Started
+
+Sticky navigation with a subtle glass effect.
+
+⸻
+
+HOME PAGE
+
+Hero Section
+
+Headline
+
+Technology built around real life.
+
+Supporting Copy
+
+VYBE Technologies creates digital products, business solutions, and human-centered technology services designed to make life simpler, safer, and more connected.
+
+Primary Buttons
+
+* Explore VYBE
+* Get Technology Support
+
+Hero Visual
+
+A large abstract three-dimensional double-V symbol floating over a dark background with glowing violet and cyan light trails.
+
+Use subtle animation:
+
+* Slow floating movement
+* Soft light pulses
+* Mouse-following glow
+* Gentle particles in the background
+
+Do not use a stock-photo hero.
+
+⸻
+
+Company Overview Strip
+
+Display four quick metrics or categories:
+
+* Digital Products
+* Technology Services
+* Business Solutions
+* Research & Innovation
+
+Each should have a minimal icon and short description.
+
+⸻
+
+“One Company. Many Ways to Connect.” Section
+
+Use a large heading followed by four modular cards.
+
+VYBE Tech Rescue
+
+Device repair, technical support, diagnostics, setup, and on-site assistance.
+
+Button:
+Explore Tech Rescue
+
+VYBE Circle
+
+A social platform built around community, identity, creativity, and genuine connection.
+
+Button:
+Discover VYBE Circle
+
+VYBE Cloud & Business
+
+Infrastructure, managed services, productivity, identity, and technology solutions for organizations.
+
+Button:
+Solutions for Business
+
+VYBE Labs
+
+Experimental products, research, emerging technologies, and future concepts from VYBE Technologies.
+
+Button:
+Visit VYBE Labs
+
+Cards should glow subtly when hovered.
+
+⸻
+
+Featured Product Section
+
+Large split-layout feature for the current flagship product.
+
+Suggested initial product:
+
+VYBE Key
+
+Your identity. Your access. Your control.
+
+A secure hardware-based identity and authentication product designed to help people protect their digital lives.
+
+Include:
+
+* Product rendering
+* Short feature list
+* “Coming Soon” badge
+* Join Waitlist button
+
+This section should be built as a reusable component so the featured product can change later.
+
+⸻
+
+Services Section
+
+Heading:
+
+Technology support without the runaround.
+
+Services displayed in a clean icon grid:
+
+* Computer Repair
+* Phone and Tablet Repair
+* Device Setup
+* Virus and Malware Removal
+* Data Transfer
+* On-Site Support
+* Business IT Support
+* Cybersecurity Assistance
+
+Button:
+Book a Service
+
+⸻
+
+Business Solutions Section
+
+Heading:
+
+Built for growing organizations.
+
+Copy:
+
+VYBE helps small businesses and growing teams manage technology, security, communication, devices, and digital operations.
+
+Service cards:
+
+* Managed Technology
+* Microsoft 365 and Google Workspace
+* Cloud Infrastructure
+* Identity and Access
+* Cybersecurity
+* Device Management
+* Websites and Digital Platforms
+* Technology Consulting
+
+CTA:
+Talk to VYBE Business
+
+⸻
+
+Mission Section
+
+Use a wide cinematic section with an abstract map or network visual.
+
+Headline:
+
+Building a stronger technology future.
+
+Copy:
+
+VYBE Technologies is committed to expanding access to technology, creating new digital opportunities, and helping build a stronger technology industry in North Dakota and beyond.
+
+Include:
+
+* Based in Fargo, North Dakota
+* Built for global reach
+* Focused on practical innovation
+* Designed around people
+
+⸻
+
+Newsroom Preview
+
+Three article cards:
+
+* Company announcements
+* Product updates
+* Community initiatives
+
+Include category, date, headline, short summary, and image.
+
+Button:
+View Newsroom
+
+⸻
+
+Careers Section
+
+Headline:
+
+Help build what comes next.
+
+Copy:
+
+We are building a company for curious people who believe technology should be ambitious, useful, and human.
+
+Buttons:
+
+* View Open Roles
+* Meet VYBE
+
+⸻
+
+Final CTA
+
+Full-width glowing panel.
+
+Headline:
+
+Let’s build something better.
+
+Buttons:
+
+* Contact VYBE
+* Get Support
+
+⸻
+
+SOLUTIONS PAGE
+
+Separate the page into:
+
+For Individuals
+
+* Device repair
+* Personal technology support
+* Setup and training
+* Security assistance
+* Smart home support
+* Subscription support plans
+
+For Businesses
+
+* IT support
+* Cloud services
+* Microsoft and Google administration
+* Device management
+* Cybersecurity
+* Communications
+* Technology consulting
+* Digital transformation
+
+For Communities
+
+* Digital literacy
+* Technology access initiatives
+* Community partnerships
+* Local economic development
+* Education and workforce programs
+
+Each section should have its own CTA.
+
+⸻
+
+PRODUCTS PAGE
+
+Use a product ecosystem layout.
+
+Initial cards:
+
+* VYBE Circle
+* VYBE Key
+* VYBE Mail
+* VYBE Sound
+* VYBE TV
+* VYBE ID
+* VYBE HUB
+
+Each product card should support:
+
+* Logo
+* Product name
+* Status badge
+* One-sentence description
+* Learn More button
+
+Possible status badges:
+
+* Available
+* Beta
+* In Development
+* Coming Soon
+* Concept
+
+Do not imply unavailable products are currently released.
+
+⸻
+
+TECH RESCUE PAGE
+
+This should function as the main service-conversion page.
+
+Hero
+
+Technology problems, rescued.
+
+Buttons:
+
+* Start a Repair
+* Call 888-231-VYBE
+
+Service Categories
+
+* Computers
+* Phones and Tablets
+* Gaming Devices
+* Home Technology
+* Business Technology
+* On-Site Support
+
+How It Works
+
+1. Tell us what is happening
+2. Get a clear estimate
+3. We diagnose and repair
+4. Get back to what matters
+
+Trust Signals
+
+* Insured business
+* Secure device handling
+* Clear pricing
+* Ownership verification
+* Privacy-first service
+* Local support
+
+Booking Form
+
+Fields:
+
+* Name
+* Email
+* Phone
+* Device type
+* Brand and model
+* Problem description
+* Preferred service type
+* Preferred date
+* File or photo upload
+
+Include consent checkbox and privacy notice.
+
+⸻
+
+ABOUT PAGE
+
+Sections
+
+* Our Story
+* Mission
+* Leadership
+* North Dakota Commitment
+* Company Values
+* Corporate Information
+
+Suggested Values
+
+* People First
+* Build Boldly
+* Earn Trust
+* Keep It Simple
+* Stay Curious
+* Create Access
+
+Include a founder message from Mason Peterson, Founder and Chief Executive Officer.
+
+Avoid making the About page feel like a personal biography. Keep the focus on the company and mission.
+
+⸻
+
+NEWSROOM PAGE
+
+Include:
+
+* Press releases
+* Product announcements
+* Company news
+* Media assets
+* Brand downloads
+* Press contact
+
+Allow filtering by category.
+
+⸻
+
+CAREERS PAGE
+
+Include:
+
+* Company culture
+* Employee principles
+* Benefits
+* Current openings
+* General interest form
+
+If no positions are open, show:
+
+There are no open roles right now, but we are always interested in meeting talented people.
+
+⸻
+
+CONTACT PAGE
+
+Create separate contact paths:
+
+* General Inquiries
+* Customer Support
+* Business Sales
+* Partnerships
+* Press
+* Careers
+* Legal
+
+Contact details:
+
+* Phone: 888-231-VYBE
+* Email: support@vybetechnologies.net
+* Location: Fargo, North Dakota
+
+Include a form with routing based on inquiry type.
+
+⸻
+
+4. Footer
+
+Footer columns:
+
+Company
+
+* About
+* Leadership
+* Newsroom
+* Careers
+* Contact
+
+Solutions
+
+* Individuals
+* Business
+* Tech Rescue
+* Support Plans
+
+Products
+
+* VYBE Circle
+* VYBE Key
+* VYBE Mail
+* VYBE TV
+
+Legal
+
+* Privacy
+* Terms
+* Accessibility
+* Security
+* Legal Notices
+
+Bottom line:
+
+© 2026 VYBE Technologies Inc. All rights reserved.
+
+Include social icons and the double-V logo.
+
+⸻
+
+5. Replit Build Requirements
+
+Recommended Stack
+
+* Next.js
+* TypeScript
+* Tailwind CSS
+* Framer Motion
+* Lucide icons
+* Supabase or Neon PostgreSQL
+* Resend for form notifications
+* Cloudflare Turnstile for spam prevention
+
+Technical Requirements
+
+* Fully responsive
+* Mobile-first
+* Fast page loads
+* Accessible keyboard navigation
+* WCAG-friendly color contrast
+* Semantic HTML
+* SEO metadata for every page
+* Open Graph images
+* Sitemap
+* Robots.txt
+* Structured data
+* Reusable components
+* CMS-ready newsroom
+* Working contact and repair forms
+* Analytics integration
+* Cookie consent where legally required
+* No placeholder links
+* No lorem ipsum
+
+Animation Rules
+
+* Smooth but restrained
+* Respect reduced-motion preferences
+* Avoid excessive scrolling effects
+* Use motion to guide attention, not distract
+
+⸻
+
+6. Component Library
+
+Create reusable components for:
+
+* Navigation
+* Mega menu
+* Hero sections
+* Product cards
+* Service cards
+* Metric cards
+* News cards
+* Team cards
+* CTA panels
+* Contact forms
+* Status badges
+* Footer
+* Modal windows
+* Toast notifications
+
+⸻
+
+7. Homepage Visual Layout
+
+Desktop layout:
+
+1. Glass navigation
+2. Full-screen hero
+3. Four-category overview
+4. Product and service ecosystem
+5. Featured product
+6. Tech Rescue services
+7. Business solutions
+8. Mission section
+9. Newsroom preview
+10. Careers CTA
+11. Final contact CTA
+12. Footer
+
+Mobile layout:
+
+* Collapsible navigation
+* Left-aligned text
+* Single-column cards
+* Sticky “Get Support” button
+* Large tap targets
+* Simplified animations
+
+⸻
+
+8. Replit Prompt
+
+Build a production-ready corporate website for VYBE Technologies Inc., a Fargo-based technology company creating digital products, business technology solutions, consumer services, and device repair services.
+
+The website should use Next.js, TypeScript, Tailwind CSS, Framer Motion, and Lucide icons. Use a dark premium visual system with near-black backgrounds, dark navy panels, electric violet, cyan, blue gradients, white headings, and muted gray body text.
+
+The design should feel like a modern global technology company: polished, ambitious, trustworthy, human-centered, and futuristic without looking like a gaming website.
+
+Create the following pages:
+
+* Home
+* Solutions
+* Products
+* Tech Rescue
+* About
+* Newsroom
+* Careers
+* Contact
+* Privacy
+* Terms
+* Accessibility
+* Security
+
+Use a glass-effect sticky navigation with the VYBE double-V logo, animated hero visuals, modular product cards, service cards, newsroom previews, strong calls to action, and a large corporate footer.
+
+The homepage headline should be:
+
+“Technology built around real life.”
+
+The supporting text should be:
+
+“VYBE Technologies creates digital products, business solutions, and human-centered technology services designed to make life simpler, safer, and more connected.”
+
+Include primary calls to action for “Explore VYBE” and “Get Technology Support.”
+
+Include sections for VYBE Tech Rescue, VYBE Circle, VYBE Cloud & Business, VYBE Labs, VYBE Key, business solutions, company mission, newsroom, and careers.
+
+Tech Rescue should include repair services, device diagnostics, on-site support, ownership verification, secure device handling, and a working service request form.
+
+Use 888-231-VYBE and support@vybetechnologies.net as company contact information.
+
+The company location should be Fargo, North Dakota.
+
+The site must be fully responsive, accessible, SEO-ready, fast, visually polished, and built with reusable components. Do not use lorem ipsum. Do not create fake testimonials, fake customer logos, fake employee counts, fake office locations, or unsupported claims.
+
+Use tasteful animations, subtle glows, abstract technology visuals, geometric patterns, and a floating three-dimensional double-V symbol. Avoid generic stock photos in the hero.
+
+Create all pages with finished sample copy, working navigation, mobile menus, form validation, loading states, success messages, error states, metadata, sitemap, and structured data.
+
+The strongest direction is a premium dark corporate site with a glowing double-V centerpiece, rather than a repair-shop-style homepage. That gives VYBE room to grow into every product and business line you’re building. 🚀
