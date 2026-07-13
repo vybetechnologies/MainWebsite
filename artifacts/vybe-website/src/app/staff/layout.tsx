@@ -5,12 +5,13 @@ import { ClerkProvider, useAuth } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { setAuthTokenGetter } from '@workspace/api-client-react';
+import { CLERK_PUBLISHABLE_KEY } from '@/lib/clerk-config';
 
 // REQUIRED — copy verbatim. Resolves the key from window.location.hostname so the
 // same build serves multiple Clerk custom domains.
 const clerkPubKey =
   typeof window !== 'undefined'
-    ? publishableKeyFromHost(window.location.hostname, process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+    ? publishableKeyFromHost(window.location.hostname, CLERK_PUBLISHABLE_KEY)
     : undefined;
 
 const clerkAppearance = {
