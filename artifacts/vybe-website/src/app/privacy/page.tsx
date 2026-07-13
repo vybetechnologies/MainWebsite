@@ -90,6 +90,53 @@ export default function PrivacyPage() {
         purposes and are not tied to any individual.
       </p>
 
+      <h2>Text messaging (SMS) communications</h2>
+      <p>
+        VYBE offers an optional text messaging (SMS) program to help keep you informed about
+        booking confirmations, appointment reminders, and service updates. Message and data
+        rates may apply based on your mobile carrier plan, and message frequency varies depending
+        on your interactions with us.
+      </p>
+      <h3>How you opt in</h3>
+      <p>You may opt in to receive text messages from VYBE in any of the following ways:</p>
+      <ul>
+        <li>
+          By checking the SMS consent checkbox on our contact, booking, or careers forms and
+          submitting your mobile number.
+        </li>
+        <li>By providing your mobile number and affirmatively agreeing to text updates over the phone.</li>
+        <li>By providing your mobile number and consent on a service intake form in person.</li>
+      </ul>
+      <p>
+        Consent to receive text messages is never a condition of purchasing any service from us.
+        By opting in, you confirm that you are the account holder or authorized user for the
+        mobile number provided, and you agree to receive automated and/or manually sent text
+        messages from VYBE related to your bookings, appointments, and account activity.
+      </p>
+      <h3>How you opt out</h3>
+      <p>You can opt out of text messages from VYBE at any time, using any of these methods:</p>
+      <ul>
+        <li>
+          Reply <strong>STOP</strong> or <strong>QUIT</strong> to any text message you receive
+          from us. You will get one final confirmation message and then receive no further texts.
+        </li>
+        <li>
+          Contact us at {CONTACT.email} or {CONTACT.phoneDisplay} and ask to be removed from our
+          text messaging program.
+        </li>
+      </ul>
+      <p>
+        If you opt out, we may still need to contact you by phone or email regarding an active
+        appointment or open invoice, since opting out of text messages does not opt you out of
+        necessary service communications. Reply <strong>HELP</strong> to any text message from us
+        for assistance.
+      </p>
+      <p>
+        Our text program is intended to work with most major U.S. mobile carriers. Carriers are
+        not liable for delayed or undelivered messages. Your phone number and SMS consent status
+        are never shared or sold to any third party for their own marketing purposes.
+      </p>
+
       <h2>Your choices and rights</h2>
       <p>
         You may ask us to access, correct, or delete the personal information you have provided to

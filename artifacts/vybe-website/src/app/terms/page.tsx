@@ -51,6 +51,17 @@ export default function TermsPage() {
         </li>
       </ul>
 
+      <h2>Text messaging (SMS) program</h2>
+      <p>
+        By opting in to receive text messages from VYBE (see our{' '}
+        <a href="/privacy">Privacy Policy</a> for details on how to opt in and out), you agree
+        that we may send you automated and/or manually sent text messages about bookings,
+        appointments, and account activity at the mobile number you provide. Consent to receive
+        text messages is never a condition of purchasing any service from us, and message and
+        data rates may apply. You can opt out at any time by replying <strong>STOP</strong> to any
+        text message or by contacting us at {CONTACT.email} or {CONTACT.phoneDisplay}.
+      </p>
+
       <h2>Acceptable use</h2>
       <p>When using our Services, you agree not to:</p>
       <ul>
