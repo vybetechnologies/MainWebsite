@@ -18,5 +18,11 @@
     "prettier": "^3.9.4",
     "typescript": "~5.9.3",
     "wrangler": "^4.107.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
+    }
   }
 }

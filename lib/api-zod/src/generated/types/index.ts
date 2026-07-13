@@ -8,4 +8,7 @@
 
 export * from './bookingRequestInput';
 export * from './bookingRequestResult';
+export * from './errorEnvelope';
 export * from './healthStatus';
+export * from './uploadUrlRequest';
+export * from './uploadUrlResponse';

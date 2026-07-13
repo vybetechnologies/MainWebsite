@@ -24,9 +24,49 @@ export interface BookingRequestInput {
   service: string;
   /** @minLength 1 */
   message: string;
+  /** e.g. Computer, Phone/Tablet, Gaming Device, Home Technology, Business Technology */
+  deviceType?: string;
+  /** Device brand and model, if known. */
+  brandModel?: string;
+  /** e.g. On-Site Support, Drop-Off, Remote Support */
+  preferredServiceType?: string;
+  /** Customer's preferred appointment date (free-text/ISO date). */
+  preferredDate?: string;
+  /** Object storage path of an optionally attached photo (from the upload-url flow). */
+  photoObjectPath?: string;
 }
 
 export interface BookingRequestResult {
   success: boolean;
+}
+
+export interface UploadUrlRequest {
+  /**
+     * Original file name.
+     * @minLength 1
+     */
+  name: string;
+  /**
+     * File size in bytes.
+     * @minimum 1
+     */
+  size: number;
+  /**
+     * MIME type of the file (e.g. `image/jpeg`).
+     * @minLength 1
+     */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  /** Presigned GCS URL for PUT upload. */
+  uploadURL: string;
+  /** Normalized object path (e.g. `/objects/uploads/uuid`). Store this in your database. */
+  objectPath: string;
+  metadata?: UploadUrlRequest;
+}
+
+export interface ErrorEnvelope {
+  error: string;
 }
 

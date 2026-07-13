@@ -21,4 +21,14 @@ export interface BookingRequestInput {
   service: string;
   /** @minLength 1 */
   message: string;
+  /** e.g. Computer, Phone/Tablet, Gaming Device, Home Technology, Business Technology */
+  deviceType?: string;
+  /** Device brand and model, if known. */
+  brandModel?: string;
+  /** e.g. On-Site Support, Drop-Off, Remote Support */
+  preferredServiceType?: string;
+  /** Customer's preferred appointment date (free-text/ISO date). */
+  preferredDate?: string;
+  /** Object storage path of an optionally attached photo (from the upload-url flow). */
+  photoObjectPath?: string;
 }

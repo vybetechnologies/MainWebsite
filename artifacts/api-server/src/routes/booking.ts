@@ -24,7 +24,31 @@ router.post("/booking-requests", async (req, res): Promise<void> => {
     return;
   }
 
-  const { firstName, lastName, email, phone, service, message } = parsed.data;
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    service,
+    message,
+    deviceType,
+    brandModel,
+    preferredServiceType,
+    preferredDate,
+    photoObjectPath,
+  } = parsed.data;
+
+  const optionalRows = [
+    deviceType ? `<p><strong>Device Type:</strong> ${escapeHtml(deviceType)}</p>` : "",
+    brandModel ? `<p><strong>Brand / Model:</strong> ${escapeHtml(brandModel)}</p>` : "",
+    preferredServiceType
+      ? `<p><strong>Preferred Service Type:</strong> ${escapeHtml(preferredServiceType)}</p>`
+      : "",
+    preferredDate ? `<p><strong>Preferred Date:</strong> ${escapeHtml(preferredDate)}</p>` : "",
+    photoObjectPath
+      ? `<p><strong>Photo Attached:</strong> ${escapeHtml(photoObjectPath)}</p>`
+      : "",
+  ].join("");
 
   const html = `
     <h2>New Booking Request</h2>
@@ -32,6 +56,7 @@ router.post("/booking-requests", async (req, res): Promise<void> => {
     <p><strong>Email:</strong> ${escapeHtml(email)}</p>
     <p><strong>Phone:</strong> ${escapeHtml(phone ?? "Not provided")}</p>
     <p><strong>Service Needed:</strong> ${escapeHtml(service)}</p>
+    ${optionalRows}
     <p><strong>Message:</strong></p>
     <p>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>
   `;

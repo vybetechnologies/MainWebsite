@@ -1,3 +1,5 @@
+'use client';
+
 const PARTNERS = [
   { name: "Microsoft", logo: "/partners/microsoft.png" },
   { name: "Google", logo: "/partners/google.svg" },
