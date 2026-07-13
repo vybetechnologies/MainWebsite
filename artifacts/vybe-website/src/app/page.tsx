@@ -32,6 +32,10 @@ import { MissionSection } from '@/components/shared/mission-section';
 import { NewsCard } from '@/components/shared/news-card';
 import { CtaPanel } from '@/components/shared/cta-panel';
 import { MobileStickyCta } from '@/components/shared/mobile-sticky-cta';
+import { urlForImage } from '@/lib/sanity/image';
+import { getLatestNewsArticles } from '@/lib/sanity/queries';
+import { NEWS_CATEGORY_LABELS } from '@/lib/sanity/types';
+import { formatArticleDate } from '@/lib/sanity/format-date';
 
 const OVERVIEW_CATEGORIES = [
   {
@@ -141,34 +145,9 @@ const BUSINESS_SOLUTIONS = [
   },
 ];
 
-const NEWS_ITEMS = [
-  {
-    category: 'Product Update',
-    date: 'June 2026',
-    title: 'VYBE Key Waitlist Now Open',
-    summary:
-      'Our first hardware identity product enters development. Join the waitlist to be among the first to know when VYBE Key is ready.',
-    href: '/newsroom',
-  },
-  {
-    category: 'Company News',
-    date: 'May 2026',
-    title: 'VYBE Technologies Opens Its Doors in Fargo, North Dakota',
-    summary:
-      'VYBE Technologies launches with a mission to build practical digital products and human-centered technology services from the ground up.',
-    href: '/newsroom',
-  },
-  {
-    category: 'Community Initiative',
-    date: 'April 2026',
-    title: 'VYBE Labs Begins Work on Future Concepts',
-    summary:
-      'Our research and innovation team starts exploring the experimental products and emerging technologies that will shape what VYBE builds next.',
-    href: '/newsroom',
-  },
-];
+export default async function Home() {
+  const latestArticles = await getLatestNewsArticles(3);
 
-export default function Home() {
   return (
     <div className="flex flex-col pb-24 lg:pb-0">
       <Hero
@@ -287,11 +266,28 @@ export default function Home() {
         <div className="mx-auto mb-14 max-w-2xl text-center">
           <h2 className="font-display text-3xl font-bold md:text-5xl">From the Newsroom</h2>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {NEWS_ITEMS.map((item) => (
-            <NewsCard key={item.title} {...item} />
-          ))}
-        </div>
+        {latestArticles.length === 0 ? (
+          <p className="mx-auto max-w-md text-center text-muted-foreground">
+            News from VYBE Technologies will appear here as soon as it's published.
+          </p>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-3">
+            {latestArticles.map((article) => (
+              <NewsCard
+                key={article._id}
+                category={NEWS_CATEGORY_LABELS[article.category]}
+                date={formatArticleDate(article.publishedAt)}
+                title={article.title}
+                summary={article.summary}
+                href={`/newsroom/${article.slug}`}
+                imageUrl={
+                  article.mainImage ? urlForImage(article.mainImage).width(800).height(450).url() : undefined
+                }
+                imageAlt={article.mainImage?.alt as string | undefined}
+              />
+            ))}
+          </div>
+        )}
         <div className="mt-12 text-center">
           <Link
             href="/newsroom"

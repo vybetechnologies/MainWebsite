@@ -1,6 +1,6 @@
-# [Project name]
+# VYBE Technologies
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Corporate website, API server, and supporting tools for VYBE Technologies (digital products, business solutions, and human-centered tech services).
 
 ## Run & Operate
 
@@ -22,11 +22,16 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/vybe-website` — Next.js 15 (App Router, static export) marketing site.
+- `artifacts/api-server` — Express API backend.
+- `artifacts/mockup-sandbox` — component preview sandbox.
+- `studio/` — standalone Sanity Studio (headless CMS) for the Newsroom, deployed to https://vybe-newsroom.sanity.studio/. Not a Replit artifact (no workflow/preview) — see `studio/README.md` for the editorial workflow.
+- `artifacts/vybe-website/src/lib/sanity/` — Sanity read client (`client.ts`, server-only), image URL builder (`image.ts`, safe for client components), GROQ queries, and types for Newsroom content.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Newsroom content lives in Sanity (project `fupqvdcv`, dataset `production`, public-read). The website statically exports (`output: 'export'`), so all Sanity fetches happen at `next build` time only — publishing a new article requires a site rebuild/redeploy, there is no runtime revalidation.
+- Sanity's data client (`@sanity/client`) must only be imported from server components/modules (`src/lib/sanity/client.ts`). The image URL builder (`src/lib/sanity/image.ts`) is separated out because it's safe to bundle into client components and only needs the public `NEXT_PUBLIC_SANITY_PROJECT_ID`/`NEXT_PUBLIC_SANITY_DATASET` env vars.
 
 ## Product
 

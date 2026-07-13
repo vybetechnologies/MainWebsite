@@ -39,6 +39,7 @@ packages:
   - lib/*
   - lib/integrations/*
   - scripts
+  - studio
 
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.21
@@ -158,3 +159,9 @@ overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.27.3"
+  # decompress@4.2.1 (pulled in transitively by @sanity/cli, only used for `sanity init`
+  # template scaffolding which we never run) is blocked by the package firewall due to
+  # unpatched zip-slip style CVEs with no newer upstream release. It is unused by the
+  # studio's dev/build/deploy scripts, so drop it entirely rather than install a
+  # vulnerable, unmaintained package.
+  decompress: "-"

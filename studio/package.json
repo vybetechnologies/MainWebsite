@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/studio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev --port ${PORT:-3333} --host 0.0.0.0",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@sanity/vision": "^6.4.0",
+    "react": "19.2.2",
+    "react-dom": "19.2.2",
+    "sanity": "^6.4.0",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "~5.9.3"
+  }
+}
