@@ -65,7 +65,7 @@ router.post("/booking-requests", async (req, res): Promise<void> => {
     await sendEmailViaResend({
       to: BOOKING_NOTIFICATION_TO,
       from: BOOKING_NOTIFICATION_FROM,
-      subject: `New booking request from ${firstName} ${lastName}`,
+      subject: `[${service}] New request from ${firstName} ${lastName}`,
       html,
       replyTo: email,
     });
