@@ -1,13 +1,12 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+import { BookingForm } from './booking-form';
 
-// BookingForm uses React Query hooks — must be loaded client-side only.
-const BookingForm = dynamic(
-  () => import('./booking-form').then((m) => ({ default: m.BookingForm })),
-  { ssr: false, loading: () => <div className="h-32 animate-pulse rounded-xl bg-card/50" /> },
-);
-
+// Same pattern as contact-page-dynamic.tsx — see that file for rationale.
 export function BookingFormDynamic() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="h-32 animate-pulse rounded-xl bg-card/50" />;
   return <BookingForm />;
 }

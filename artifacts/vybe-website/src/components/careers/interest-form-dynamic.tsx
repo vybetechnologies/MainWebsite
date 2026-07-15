@@ -1,13 +1,12 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+import { CareersInterestForm } from './interest-form';
 
-// CareersInterestForm uses React Query hooks — must be loaded client-side only.
-const CareersInterestForm = dynamic(
-  () => import('./interest-form').then((m) => ({ default: m.CareersInterestForm })),
-  { ssr: false, loading: () => <div className="h-32 animate-pulse rounded-xl bg-card/50" /> },
-);
-
+// Same pattern as contact-page-dynamic.tsx — see that file for rationale.
 export function CareersInterestFormDynamic() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="h-32 animate-pulse rounded-xl bg-card/50" />;
   return <CareersInterestForm />;
 }

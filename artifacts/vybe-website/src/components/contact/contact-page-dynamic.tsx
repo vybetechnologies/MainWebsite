@@ -1,14 +1,15 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+import { ContactPageContent } from './contact-page-content';
 
-// ContactPageContent uses React Query hooks — must be loaded client-side only
-// to avoid "No QueryClient set" errors during Next.js static export prerender.
-const ContactPageContent = dynamic(
-  () => import('./contact-page-content').then((m) => ({ default: m.ContactPageContent })),
-  { ssr: false, loading: () => <div className="min-h-[60vh]" /> },
-);
-
+// ContactPageContent uses React Query hooks which require a browser environment.
+// The useState/useEffect mount gate ensures server and client both render the
+// same placeholder div on first pass, eliminating React 19's hydration mismatch
+// that next/dynamic({ ssr: false }) triggers via its internal Suspense boundary.
 export function ContactPageDynamic() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="min-h-[60vh]" />;
   return <ContactPageContent />;
 }
