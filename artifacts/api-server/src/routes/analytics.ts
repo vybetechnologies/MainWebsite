@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { sql, gte, desc } from "drizzle-orm";
 import { db, pageViewsTable } from "@workspace/db";
 import { requireAdminToken } from "../middlewares/require-admin-token";
+import { cleanupOldPageViews } from "../jobs/pageViewCleanup";
 
 const router: IRouter = Router();
 
@@ -106,6 +107,33 @@ router.get("/analytics/pageviews", requireAdminToken, async (req, res): Promise<
   } catch (err) {
     req.log.error({ err }, "Failed to load page-view report");
     res.status(500).json({ error: "Failed to load page-view report" });
+  }
+});
+
+const MAX_RETENTION_DAYS = 36500; // 100 years — sanity upper bound
+
+// POST /admin/analytics/cleanup — trigger an immediate page-view cleanup.
+// Protected by the shared admin token. An optional `retentionDays` query
+// parameter overrides the default 730-day window for this single run.
+router.post("/admin/analytics/cleanup", requireAdminToken, async (req, res): Promise<void> => {
+  const raw = req.query.retentionDays;
+  let retentionDays: number | undefined;
+
+  if (raw !== undefined) {
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed <= 0 || !Number.isInteger(parsed)) {
+      res.status(400).json({ error: "retentionDays must be a positive integer" });
+      return;
+    }
+    retentionDays = Math.min(parsed, MAX_RETENTION_DAYS);
+  }
+
+  try {
+    const deleted = await cleanupOldPageViews(retentionDays);
+    res.status(200).json({ deleted, retentionDays: retentionDays ?? 730 });
+  } catch (err) {
+    req.log.error({ err }, "Admin-triggered page-view cleanup failed");
+    res.status(500).json({ error: "Cleanup failed" });
   }
 });
 
