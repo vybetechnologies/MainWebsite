@@ -1,9 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookingForm } from './booking-form';
+import dynamic from 'next/dynamic';
 
 // Same pattern as contact-page-dynamic.tsx — see that file for rationale.
+const BookingForm = dynamic(
+  () => import('./booking-form').then((m) => ({ default: m.BookingForm })),
+  { ssr: false, loading: () => null },
+);
+
 export function BookingFormDynamic() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

@@ -1,9 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CareersInterestForm } from './interest-form';
+import dynamic from 'next/dynamic';
 
 // Same pattern as contact-page-dynamic.tsx — see that file for rationale.
+const CareersInterestForm = dynamic(
+  () => import('./interest-form').then((m) => ({ default: m.CareersInterestForm })),
+  { ssr: false, loading: () => null },
+);
+
 export function CareersInterestFormDynamic() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
