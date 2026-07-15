@@ -9,3 +9,6 @@
 - [Next.js static export sitemap/robots](nextjs-static-export-sitemap-robots.md) — app/sitemap.ts and app/robots.ts need `export const dynamic = 'force-static'` under output:'export', and can't coexist with a public/robots.txt file.
 - [TS project references need rebuild after new lib exports](ts-project-references-stale-dist.md) — adding an export to a composite lib package (e.g. lib/db) isn't visible to dependents until `pnpm run typecheck:libs` (`tsc --build`) regenerates that lib's dist/*.d.ts.
 - [Internal-only pages on a static-export Next site](internal-admin-page-static-export.md) — vybe-website is `output: 'export'`, so admin/report pages must fetch client-side from api-server; gate with a shared-secret header checked server-side, not Next middleware.
+- [Cloudflare Pages build env](cloudflare-pages-build-env.md) — build command must be `pages:build`; Sanity env vars must be set on CF; React Query hooks need ssr:false wrappers; dynamicParams=false needed alongside generateStaticParams.
+- [Fly DATABASE_URL trap](fly-database-url.md) — Fly needs DATABASE_URL set explicitly; NEON_DATABASE_URL alone is not enough; lib/db reads DATABASE_URL.
+- [External Clerk on static-export + Fly API](clerk-external-static-export.md) — publishable key committed to clerk-config.ts; ssr:false wrappers on all /staff pages; do NOT re-run Replit Clerk setup.
