@@ -11,6 +11,10 @@ import { NEWS_CATEGORY_LABELS } from '@/lib/sanity/types';
 import { formatArticleDateLong } from '@/lib/sanity/format-date';
 import { buildMetadata } from '@/lib/seo';
 
+// No server-side fallback for unknown slugs in static export — if Sanity has
+// no articles at build time the route generates zero pages (valid behaviour).
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const slugs = await getNewsArticleSlugs();
   return slugs.map((slug) => ({ slug }));
