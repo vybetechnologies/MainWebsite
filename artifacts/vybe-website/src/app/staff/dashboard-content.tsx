@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Show, useUser, useClerk } from '@clerk/react';
 import { useListBookingRequests } from '@workspace/api-client-react';
 
-const STAFF_ALLOWED_EMAILS = ['mason@vybetechnologies.net', 'mavis@vybetechnologies.net'];
+/** Only admins of the VYBE organization are authorized to access the staff dashboard. */
+const VYBE_ORG_ID = 'org_3GYdwBU3lsknE6GICi5mlPVoRjD';
 
 function SignOutButton() {
   const { signOut } = useClerk();
@@ -80,8 +81,10 @@ export default function StaffDashboardPage() {
   const { user, isLoaded } = useUser();
 
   const isAuthorized = useMemo(() => {
-    const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
-    return Boolean(email && STAFF_ALLOWED_EMAILS.includes(email));
+    if (!user) return false;
+    return user.organizationMemberships.some(
+      (m) => m.organization.id === VYBE_ORG_ID && m.role === 'org:admin',
+    );
   }, [user]);
 
   return (
@@ -107,8 +110,8 @@ export default function StaffDashboardPage() {
           <div className="flex flex-col items-center gap-3 py-24 text-center">
             <h1 className="font-display text-2xl font-semibold">Not authorized</h1>
             <p className="text-muted-foreground max-w-sm">
-              {user?.primaryEmailAddress?.emailAddress} isn&rsquo;t on the staff list. Contact an
-              administrator if you believe this is a mistake.
+              Your account isn&rsquo;t an admin of the VYBE organization. Contact an administrator
+              if you believe this is a mistake.
             </p>
             <SignOutButton />
           </div>
