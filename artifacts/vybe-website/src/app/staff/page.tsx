@@ -1,13 +1,14 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-// Clerk's React SDK requires a browser environment (ClerkProvider only
-// initializes client-side — see staff/layout.tsx). With `output: 'export'`,
-// Next still prerenders every page on the server at build time, so this
-// content must be loaded with `ssr: false` to skip that pass entirely.
-const DashboardContent = dynamic(() => import('./dashboard-content'), { ssr: false });
+// Mount gate instead of next/dynamic({ ssr: false }) — see staff-client-layout.tsx.
+import { useState, useEffect } from 'react';
+import DashboardContent from './dashboard-content';
 
 export default function StaffDashboardPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
   return <DashboardContent />;
 }
