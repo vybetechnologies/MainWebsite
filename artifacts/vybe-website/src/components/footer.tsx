@@ -137,7 +137,22 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} VYBE Technologies Inc. All rights reserved.</p>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <p>© {new Date().getFullYear()} VYBE Technologies Inc. All rights reserved.</p>
+            <a
+              href="https://www.bbb.org"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Better Business Bureau listing"
+              className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-white/20 hover:text-foreground transition-colors shrink-0"
+            >
+              <span className="font-bold tracking-tight text-[#0D4DA1]">BBB</span>
+              <span className="text-white/30">·</span>
+              <span>Listed</span>
+              <span className="text-white/30">·</span>
+              <span className="italic text-white/50">Accreditation Pending</span>
+            </a>
+          </div>
           <div className="flex flex-wrap gap-6">
             <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy Policy
