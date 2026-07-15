@@ -1,7 +1,7 @@
 import { Heart, Rocket, ShieldCheck, GraduationCap, HeartPulse, CalendarClock } from 'lucide-react';
 import { Hero } from '@/components/shared/hero';
 import { ServiceCard } from '@/components/shared/service-card';
-import { CareersInterestForm } from '@/components/careers/interest-form';
+import { CareersInterestFormDynamic } from '@/components/careers/interest-form-dynamic';
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
@@ -104,7 +104,7 @@ export default function CareersPage() {
               fit opens up.
             </p>
           </div>
-          <CareersInterestForm />
+          <CareersInterestFormDynamic />
         </div>
       </section>
     </div>

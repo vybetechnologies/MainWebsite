@@ -68,6 +68,7 @@ const NAV_LINKS: NavItem[] = [
   },
   { label: 'Tech Rescue', href: '/tech-rescue' },
   { label: 'About', href: '/about' },
+  { label: 'Partners', href: '/partners' },
   { label: 'Newsroom', href: '/newsroom' },
   { label: 'Careers', href: '/careers' },
   { label: 'Contact', href: '/contact' },
