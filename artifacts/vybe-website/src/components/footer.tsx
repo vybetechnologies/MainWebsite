@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { Mail, Phone, MapPin, ArrowRight, Github, Linkedin, Twitter } from 'lucide-react';
 import { CONTACT } from '@/lib/contact-info';
