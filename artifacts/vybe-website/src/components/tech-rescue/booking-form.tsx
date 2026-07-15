@@ -1,7 +1,8 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useCreateBookingRequest } from '@workspace/api-client-react';
+import { createBookingRequest, setBaseUrl } from '@workspace/api-client-react';
+import { resolveApiBaseUrl } from '@/lib/api-base';
 import { useUpload } from '@workspace/object-storage-web';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -41,7 +42,6 @@ export function BookingForm() {
   const [consent, setConsent] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
-  const bookingRequest = useCreateBookingRequest();
   const { uploadFile, isUploading, error: uploadError } = useUpload();
 
   if (status === 'success') {
@@ -108,20 +108,19 @@ export function BookingForm() {
         photoObjectPath = uploadResult.objectPath;
       }
 
-      await bookingRequest.mutateAsync({
-        data: {
-          firstName,
-          lastName,
-          email,
-          ...(phone ? { phone } : {}),
-          service: deviceType,
-          message,
-          deviceType,
-          ...(brandModel ? { brandModel } : {}),
-          ...(preferredServiceType ? { preferredServiceType } : {}),
-          ...(preferredDate ? { preferredDate } : {}),
-          ...(photoObjectPath ? { photoObjectPath } : {}),
-        },
+      setBaseUrl(resolveApiBaseUrl(window.location.hostname));
+      await createBookingRequest({
+        firstName,
+        lastName,
+        email,
+        ...(phone ? { phone } : {}),
+        service: deviceType,
+        message,
+        deviceType,
+        ...(brandModel ? { brandModel } : {}),
+        ...(preferredServiceType ? { preferredServiceType } : {}),
+        ...(preferredDate ? { preferredDate } : {}),
+        ...(photoObjectPath ? { photoObjectPath } : {}),
       });
 
       setStatus('success');
@@ -138,7 +137,7 @@ export function BookingForm() {
     }
   };
 
-  const submitting = status === 'submitting' || isUploading || bookingRequest.isPending;
+  const submitting = status === 'submitting' || isUploading;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>

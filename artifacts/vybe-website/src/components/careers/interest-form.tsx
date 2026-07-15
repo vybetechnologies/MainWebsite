@@ -1,7 +1,8 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useCreateBookingRequest } from '@workspace/api-client-react';
+import { createBookingRequest, setBaseUrl } from '@workspace/api-client-react';
+import { resolveApiBaseUrl } from '@/lib/api-base';
 import {
   ContactFormShell,
   FormField,
@@ -31,7 +32,6 @@ export function CareersInterestForm() {
   const [status, setStatus] = useFormStatus();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [areaOfInterest, setAreaOfInterest] = useState('');
-  const bookingRequest = useCreateBookingRequest();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -52,15 +52,14 @@ export function CareersInterestForm() {
 
     setStatus('submitting');
     try {
-      await bookingRequest.mutateAsync({
-        data: {
-          firstName,
-          lastName,
-          email,
-          ...(phone ? { phone } : {}),
-          service: `Careers — ${areaOfInterest || 'General Interest'}`,
-          message,
-        },
+      setBaseUrl(resolveApiBaseUrl(window.location.hostname));
+      await createBookingRequest({
+        firstName,
+        lastName,
+        email,
+        ...(phone ? { phone } : {}),
+        service: `Careers — ${areaOfInterest || 'General Interest'}`,
+        message,
       });
       setStatus('success');
       form.reset();

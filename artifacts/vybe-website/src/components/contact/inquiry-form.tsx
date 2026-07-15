@@ -11,7 +11,8 @@ import {
   Scale,
   type LucideIcon,
 } from 'lucide-react';
-import { useCreateBookingRequest } from '@workspace/api-client-react';
+import { createBookingRequest, setBaseUrl } from '@workspace/api-client-react';
+import { resolveApiBaseUrl } from '@/lib/api-base';
 import {
   ContactFormShell,
   FormField,
@@ -127,7 +128,6 @@ export function InquiryForm({
 }) {
   const [status, setStatus] = useFormStatus();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const bookingRequest = useCreateBookingRequest();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -148,15 +148,14 @@ export function InquiryForm({
 
     setStatus('submitting');
     try {
-      await bookingRequest.mutateAsync({
-        data: {
-          firstName,
-          lastName,
-          email,
-          ...(phone ? { phone } : {}),
-          service: inquiryType,
-          message,
-        },
+      setBaseUrl(resolveApiBaseUrl(window.location.hostname));
+      await createBookingRequest({
+        firstName,
+        lastName,
+        email,
+        ...(phone ? { phone } : {}),
+        service: inquiryType,
+        message,
       });
       setStatus('success');
       form.reset();

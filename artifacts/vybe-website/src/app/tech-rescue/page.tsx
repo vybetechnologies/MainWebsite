@@ -19,7 +19,7 @@ import {
 import { Hero } from '@/components/shared/hero';
 import { ServiceCard } from '@/components/shared/service-card';
 import { CONTACT } from '@/lib/contact-info';
-import { BookingFormDynamic } from '@/components/tech-rescue/booking-form-dynamic';
+import { BookingForm } from '@/components/tech-rescue/booking-form';
 import { buildMetadata, techRescueLocalBusinessJsonLd } from '@/lib/seo';
 
 export const metadata = buildMetadata({
@@ -164,7 +164,7 @@ export default function TechRescuePage() {
               </a>
             </div>
             <div className="rounded-2xl border border-card-border bg-card p-6 md:p-8">
-              <BookingFormDynamic />
+              <BookingForm />
             </div>
           </div>
         </div>
