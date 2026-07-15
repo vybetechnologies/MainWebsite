@@ -2,17 +2,15 @@
 
 import { ReactNode, useEffect } from 'react';
 import { ClerkProvider, useAuth } from '@clerk/react';
-import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { setAuthTokenGetter } from '@workspace/api-client-react';
 import { CLERK_PUBLISHABLE_KEY } from '@/lib/clerk-config';
 
-// REQUIRED — copy verbatim. Resolves the key from window.location.hostname so the
-// same build serves multiple Clerk custom domains.
+// Use the external Clerk publishable key directly — do NOT use publishableKeyFromHost
+// (a Replit-internal API) as it routes Clerk JS through Replit's proxy and ignores
+// the configured external key.
 const clerkPubKey =
-  typeof window !== 'undefined'
-    ? publishableKeyFromHost(window.location.hostname, CLERK_PUBLISHABLE_KEY)
-    : undefined;
+  typeof window !== 'undefined' ? CLERK_PUBLISHABLE_KEY : undefined;
 
 const clerkAppearance = {
   theme: shadcn,
