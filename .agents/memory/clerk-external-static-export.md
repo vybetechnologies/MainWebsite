@@ -16,6 +16,9 @@ Cloudflare Pages has no build-time secret injection wired up for this project. T
 ## Secret key on Fly
 `CLERK_SECRET_KEY` and `CLERK_PUBLISHABLE_KEY` must both be set as Fly secrets. `@clerk/express` uses the secret key to validate JWTs server-side.
 
+## ClerkProvider rendering pattern (hard-won lesson)
+Render `ClerkProvider` **unconditionally** in the `'use client'` layout — no `typeof window` check, no `useState`+`useEffect` mount gate, no `next/dynamic` wrapper. `@clerk/react`'s ClerkProvider handles SSR/static-export build passes internally. Adding any deferred-mount pattern creates a tree-teardown gap: when the tree switches from `<div>{children}</div>` to `<ClerkProvider>...<div>{children}</div></ClerkProvider>`, React unmounts the dynamically-loaded page content before it can mount inside the provider context, leaving the form permanently blank. Use `ClerkLoading` / `ClerkLoaded` inside page content to show a spinner while Clerk JS fetches — do not try to gate the layout itself.
+
 ## Staff pages (ssr:false required)
 All pages under `/staff` use `next/dynamic(..., { ssr: false })` with a `'use client'` wrapper page, because `ClerkProvider` and all Clerk React components throw during Next.js static prerender. Layout returns children unwrapped when `clerkPubKey` is undefined (server pass), but child pages must also skip rendering via ssr:false.
 
