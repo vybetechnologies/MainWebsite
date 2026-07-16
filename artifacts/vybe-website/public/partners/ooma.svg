@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" fill="none">
+  <!-- Ooma red circle icon -->
+  <circle cx="32" cy="40" r="20" fill="#E31837"/>
+  <circle cx="32" cy="40" r="10" fill="#fff"/>
+  <!-- Ooma text -->
+  <text x="62" y="50" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800" fill="#1A1A2E" letter-spacing="-1">ooma</text>
+</svg>

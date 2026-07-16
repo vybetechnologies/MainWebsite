@@ -115,6 +115,14 @@ const PARTNERS: Partner[] = [
     website: 'https://stripe.com',
   },
   {
+    name: 'Ooma Office',
+    logo: '/partners/ooma.svg',
+    category: 'Communications',
+    description:
+      "Ooma Office powers VYBE's business phone system with cloud-based VoIP built for small and growing teams. As an authorized Ooma reseller, we also deploy Ooma Office for our clients — giving them a reliable, feature-rich phone solution backed by VYBE's hands-on support.",
+    website: 'https://www.ooma.com/office/',
+  },
+  {
     name: 'Bluevine',
     logo: '/partners/bluevine.svg',
     category: 'Banking & Finance',

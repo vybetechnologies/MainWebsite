@@ -13,6 +13,7 @@ const PARTNERS = [
   { name: "Bluevine", logo: "/partners/bluevine.svg" },
   { name: "Stripe", logo: "/partners/stripe.svg" },
   { name: "Wave Advisors", logo: "/partners/wave.svg" },
+  { name: "Ooma Office", logo: "/partners/ooma.svg" },
 ];
 
 export function Partners() {
