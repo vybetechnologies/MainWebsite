@@ -111,7 +111,7 @@ const PARTNERS: Partner[] = [
     logo: '/partners/stripe.svg',
     category: 'Payments',
     description:
-      'Stripe powers VYBE's global payout infrastructure, enabling earnings to flow directly to customer wallets and bank accounts across 46+ countries. From payment processing to financial automation, Stripe keeps our platform moving money reliably and securely.',
+      "Stripe powers VYBE's global payout infrastructure, enabling earnings to flow directly to customer wallets and bank accounts across 46+ countries. From payment processing to financial automation, Stripe keeps our platform moving money reliably and securely.",
     website: 'https://stripe.com',
   },
   {
