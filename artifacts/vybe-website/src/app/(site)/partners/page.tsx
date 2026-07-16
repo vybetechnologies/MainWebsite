@@ -106,6 +106,30 @@ const PARTNERS: Partner[] = [
       'VYBE Technologies uses Square to power secure, seamless payments across the platform — from Tech Rescue repair deposits and staff-generated invoices to full catalog checkout in the VYBE Marketplace. Square handles card processing, order tracking, and receipts so customers can pay with confidence.',
     website: 'https://squareup.com',
   },
+  {
+    name: 'Stripe',
+    logo: '/partners/stripe.svg',
+    category: 'Payments',
+    description:
+      'Stripe powers VYBE's global payout infrastructure, enabling earnings to flow directly to customer wallets and bank accounts across 46+ countries. From payment processing to financial automation, Stripe keeps our platform moving money reliably and securely.',
+    website: 'https://stripe.com',
+  },
+  {
+    name: 'Bluevine',
+    logo: '/partners/bluevine.svg',
+    category: 'Banking & Finance',
+    description:
+      'Bluevine provides VYBE Technologies with modern business banking built for growth — including high-yield checking, lines of credit, and bill pay. Their small-business-first approach aligns with our commitment to keeping VYBE financially agile and operationally strong.',
+    website: 'https://bluevine.com',
+  },
+  {
+    name: 'Wave Advisors',
+    logo: '/partners/wave.svg',
+    category: 'Banking & Finance',
+    description:
+      'Wave Advisors supports VYBE's financial operations with expert accounting, bookkeeping, and advisory services — helping us maintain clean books, stay tax-ready, and make data-driven financial decisions as we scale.',
+    website: 'https://waveapps.com',
+  },
 ];
 
 const CATEGORIES = [...new Set(PARTNERS.map((p) => p.category))];
