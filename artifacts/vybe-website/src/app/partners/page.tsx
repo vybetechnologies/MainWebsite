@@ -11,7 +11,7 @@ export const metadata = buildMetadata({
 
 interface Partner {
   name: string;
-  domain: string;
+  logo: string;
   category: string;
   description: string;
   website: string;
@@ -20,7 +20,7 @@ interface Partner {
 const PARTNERS: Partner[] = [
   {
     name: 'Microsoft',
-    domain: 'microsoft.com',
+    logo: '/partners/microsoft.png',
     category: 'Cloud & Software',
     description:
       'As a Microsoft AI Cloud Partner, we deliver Microsoft\'s full commercial portfolio — from Microsoft 365 and Azure cloud services to Windows-based business solutions for teams of every size.',
@@ -28,7 +28,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Google',
-    domain: 'google.com',
+    logo: '/partners/google.svg',
     category: 'Cloud & Workspace',
     description:
       'Our Google partnership gives customers access to Google Workspace and Google Cloud solutions — collaboration tools, storage, and enterprise-grade infrastructure backed by Google\'s global network.',
@@ -36,7 +36,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Apple',
-    domain: 'apple.com',
+    logo: '/partners/apple.svg',
     category: 'Device Service',
     description:
       'VYBE Technologies is authorized to service Apple devices. Our Tech Rescue technicians handle iPhone, iPad, Mac, and Apple Watch repairs with genuine parts and proper diagnostic tools.',
@@ -44,7 +44,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Samsung',
-    domain: 'samsung.com',
+    logo: '/partners/samsung.svg',
     category: 'Device Service',
     description:
       'Certified to repair Samsung smartphones, tablets, and devices. From Galaxy screen replacements to software issues, our team handles Samsung hardware with the care it deserves.',
@@ -52,7 +52,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Cloudflare',
-    domain: 'cloudflare.com',
+    logo: '/partners/cloudflare.png',
     category: 'Infrastructure',
     description:
       'Our customer-facing websites run on Cloudflare Pages and are protected by Cloudflare\'s global edge network — delivering fast load times, DDoS protection, and zero-trust security at scale.',
@@ -60,7 +60,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Fly.io',
-    domain: 'fly.io',
+    logo: '/partners/flyio.png',
     category: 'Infrastructure',
     description:
       'VYBE\'s API and backend services are deployed on Fly.io\'s globally distributed compute platform — giving our applications low-latency, resilient infrastructure close to our users.',
@@ -68,7 +68,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Neon',
-    domain: 'neon.tech',
+    logo: '/partners/neon.svg',
     category: 'Infrastructure',
     description:
       'Our production databases run on Neon\'s serverless Postgres platform, a Databricks company — delivering autoscaling, branching, and instant provisioning for modern application workloads.',
@@ -76,7 +76,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Pax8',
-    domain: 'pax8.com',
+    logo: '/partners/pax8.png',
     category: 'Cloud Marketplace',
     description:
       'Through our Pax8 partnership, we source and deliver hundreds of leading cloud products to business customers — simplifying procurement, licensing, and support under one roof.',
@@ -84,7 +84,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'iFixit',
-    domain: 'ifixit.com',
+    logo: '/partners/ifixit.svg',
     category: 'Repair & Parts',
     description:
       'iFixit is the world\'s largest open repair community and a trusted source for quality device parts. Their repair guides and components power a significant part of our Tech Rescue toolkit.',
@@ -92,7 +92,7 @@ const PARTNERS: Partner[] = [
   },
   {
     name: 'Mobilesentrix',
-    domain: 'mobilesentrix.com',
+    logo: '/partners/mobilesentrix.png',
     category: 'Repair & Parts',
     description:
       'Mobilesentrix is a premier wholesale distributor of mobile device replacement parts. Our partnership ensures our repair inventory is stocked with high-quality components at competitive prices.',
@@ -108,7 +108,7 @@ function PartnerCard({ partner }: { partner: Partner }) {
       <div className="flex items-start gap-4">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-card-border bg-background overflow-hidden">
           <Image
-            src={`https://logo.clearbit.com/${partner.domain}`}
+            src={partner.logo}
             alt={`${partner.name} logo`}
             width={40}
             height={40}
