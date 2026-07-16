@@ -1,10 +1,14 @@
 import { Router, type IRouter } from "express";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { CreateBookingRequestBody } from "@workspace/api-zod";
-import { db, bookingRequestsTable } from "@workspace/db";
+import { db, bookingRequestsTable, updateBookingRequestSchema } from "@workspace/db";
 import { sendEmailViaResend } from "../lib/resend";
 import { requireStaffAuth } from "../lib/staff-auth";
 import { addSseClient, removeSseClient, notifyNewBooking } from "../lib/booking-sse";
+import { buildBookingStatusEmail } from "../lib/email-templates";
+
+const NOTIFICATIONS_FROM =
+  process.env["NOTIFICATIONS_FROM"] ?? "notifications@vybetechnologies.net";
 
 const router: IRouter = Router();
 
@@ -141,6 +145,56 @@ router.get("/booking-requests/stream", requireStaffAuth, (req, res): void => {
 
   req.on("close", cleanup);
   req.on("error", cleanup);
+});
+
+// ── Staff: update booking request status ──────────────────────────────────────
+
+router.patch("/staff/booking-requests/:id", requireStaffAuth, async (req, res): Promise<void> => {
+  const { id } = req.params;
+  const parsed = updateBookingRequestSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  try {
+    const [booking] = await db
+      .update(bookingRequestsTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(bookingRequestsTable.id, id))
+      .returning();
+
+    if (!booking) {
+      res.status(404).json({ error: "Booking request not found" });
+      return;
+    }
+
+    // Send a status-change email to the customer when status is updated.
+    if (parsed.data.status) {
+      try {
+        const { subject, html } = buildBookingStatusEmail({
+          firstName: booking.firstName,
+          lastName: booking.lastName,
+          service: booking.service,
+          status: booking.status,
+        });
+        await sendEmailViaResend({
+          to: booking.email,
+          from: NOTIFICATIONS_FROM,
+          subject,
+          html,
+        });
+      } catch (emailErr) {
+        // Log but do not block — the status update already succeeded.
+        req.log.error({ err: emailErr }, "Failed to send booking status email");
+      }
+    }
+
+    res.status(200).json({ booking });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update booking request");
+    res.status(500).json({ error: "Failed to update booking request" });
+  }
 });
 
 router.get("/booking-requests", requireStaffAuth, async (req, res): Promise<void> => {

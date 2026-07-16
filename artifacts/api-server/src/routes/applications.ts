@@ -8,6 +8,11 @@ import {
   updateJobApplicationSchema,
 } from "@workspace/db";
 import { requireStaffAuth } from "../lib/staff-auth";
+import { sendEmailViaResend } from "../lib/resend";
+import { buildApplicationStatusEmail } from "../lib/email-templates";
+
+const NOTIFICATIONS_FROM =
+  process.env["NOTIFICATIONS_FROM"] ?? "notifications@vybetechnologies.net";
 
 const router: IRouter = Router();
 
@@ -104,6 +109,28 @@ router.patch("/staff/applications/:id", requireStaffAuth, async (req, res): Prom
       res.status(404).json({ error: "Application not found" });
       return;
     }
+
+    // Send a status-change email to the applicant when status is updated.
+    if (parsed.data.status) {
+      try {
+        const { subject, html } = buildApplicationStatusEmail({
+          firstName: application.firstName,
+          lastName: application.lastName,
+          jobTitle: application.jobListingTitle,
+          status: application.status,
+        });
+        await sendEmailViaResend({
+          to: application.email,
+          from: NOTIFICATIONS_FROM,
+          subject,
+          html,
+        });
+      } catch (emailErr) {
+        // Log but do not block — the status update already succeeded.
+        req.log.error({ err: emailErr }, "Failed to send application status email");
+      }
+    }
+
     res.status(200).json({ application });
   } catch (err) {
     req.log.error({ err }, "Failed to update application");
