@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
 import { CreateBookingRequestBody } from "@workspace/api-zod";
-import { db, bookingRequestsTable, updateBookingRequestSchema } from "@workspace/db";
+import { db, bookingRequestsTable, emailOptOutsTable, updateBookingRequestSchema } from "@workspace/db";
 import { sendEmailViaResend } from "../lib/resend";
 import { requireStaffAuth } from "../lib/staff-auth";
 import { addSseClient, removeSseClient, notifyNewBooking } from "../lib/booking-sse";
 import { buildBookingStatusEmail } from "../lib/email-templates";
+import { buildUnsubscribeUrl } from "../lib/unsubscribe-token";
 
 const NOTIFICATIONS_FROM =
   process.env["NOTIFICATIONS_FROM"] ?? "notifications@vybetechnologies.net";
@@ -172,18 +173,28 @@ router.patch("/staff/booking-requests/:id", requireStaffAuth, async (req, res): 
     // Send a status-change email to the customer when status is updated.
     if (parsed.data.status) {
       try {
-        const { subject, html } = buildBookingStatusEmail({
-          firstName: booking.firstName,
-          lastName: booking.lastName,
-          service: booking.service,
-          status: booking.status,
-        });
-        await sendEmailViaResend({
-          to: booking.email,
-          from: NOTIFICATIONS_FROM,
-          subject,
-          html,
-        });
+        // Skip silently if the customer has opted out.
+        const [optOut] = await db
+          .select({ email: emailOptOutsTable.email })
+          .from(emailOptOutsTable)
+          .where(eq(emailOptOutsTable.email, booking.email.toLowerCase()))
+          .limit(1);
+
+        if (!optOut) {
+          const { subject, html } = buildBookingStatusEmail({
+            firstName: booking.firstName,
+            lastName: booking.lastName,
+            service: booking.service,
+            status: booking.status,
+            unsubscribeUrl: buildUnsubscribeUrl(booking.email),
+          });
+          await sendEmailViaResend({
+            to: booking.email,
+            from: NOTIFICATIONS_FROM,
+            subject,
+            html,
+          });
+        }
       } catch (emailErr) {
         // Log but do not block — the status update already succeeded.
         req.log.error({ err: emailErr }, "Failed to send booking status email");

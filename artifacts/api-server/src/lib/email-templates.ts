@@ -13,7 +13,11 @@ export function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function vybeLayout(content: string): string {
+function vybeLayout(content: string, unsubscribeUrl?: string): string {
+  const unsubscribeFooter = unsubscribeUrl
+    ? `<br/>Don't want these updates? <a href="${unsubscribeUrl}" style="color:#555;">Unsubscribe</a>`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +51,7 @@ function vybeLayout(content: string): string {
           <tr>
             <td style="padding-top:24px;border-top:1px solid #1e1e1e;font-size:12px;color:#555;line-height:1.6;">
               VYBE Technologies &mdash; support@vybetechnologies.net<br/>
-              This email was sent because your status was updated by our team.
+              This email was sent because your status was updated by our team.${unsubscribeFooter}
             </td>
           </tr>
 
@@ -86,6 +90,7 @@ export function buildApplicationStatusEmail(opts: {
   lastName: string;
   jobTitle: string;
   status: string;
+  unsubscribeUrl?: string;
 }): { subject: string; html: string } {
   const label = APPLICATION_STATUS_LABELS[opts.status] ?? opts.status;
   const message =
@@ -110,7 +115,7 @@ export function buildApplicationStatusEmail(opts: {
     </p>
   `;
 
-  return { subject, html: vybeLayout(content) };
+  return { subject, html: vybeLayout(content, opts.unsubscribeUrl) };
 }
 
 // ── Booking / repair status labels ────────────────────────────────────────────
@@ -136,6 +141,7 @@ export function buildBookingStatusEmail(opts: {
   lastName: string;
   service: string;
   status: string;
+  unsubscribeUrl?: string;
 }): { subject: string; html: string } {
   const label = BOOKING_STATUS_LABELS[opts.status] ?? opts.status;
   const message =
@@ -160,5 +166,5 @@ export function buildBookingStatusEmail(opts: {
     </p>
   `;
 
-  return { subject, html: vybeLayout(content) };
+  return { subject, html: vybeLayout(content, opts.unsubscribeUrl) };
 }

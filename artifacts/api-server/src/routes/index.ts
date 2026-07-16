@@ -10,6 +10,7 @@ import configRouter from "./config";
 import paymentsRouter from "./payments";
 import catalogRouter from "./catalog";
 import invoicesRouter from "./invoices";
+import unsubscribeRouter from "./unsubscribe";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(configRouter);
 router.use(paymentsRouter);
 router.use(catalogRouter);
 router.use(invoicesRouter);
+router.use(unsubscribeRouter);
 
 export default router;

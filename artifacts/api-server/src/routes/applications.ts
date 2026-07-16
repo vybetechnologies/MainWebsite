@@ -4,12 +4,14 @@ import {
   db,
   jobApplicationsTable,
   jobListingsTable,
+  emailOptOutsTable,
   insertJobApplicationSchema,
   updateJobApplicationSchema,
 } from "@workspace/db";
 import { requireStaffAuth } from "../lib/staff-auth";
 import { sendEmailViaResend } from "../lib/resend";
 import { buildApplicationStatusEmail } from "../lib/email-templates";
+import { buildUnsubscribeUrl } from "../lib/unsubscribe-token";
 
 const NOTIFICATIONS_FROM =
   process.env["NOTIFICATIONS_FROM"] ?? "notifications@vybetechnologies.net";
@@ -113,18 +115,28 @@ router.patch("/staff/applications/:id", requireStaffAuth, async (req, res): Prom
     // Send a status-change email to the applicant when status is updated.
     if (parsed.data.status) {
       try {
-        const { subject, html } = buildApplicationStatusEmail({
-          firstName: application.firstName,
-          lastName: application.lastName,
-          jobTitle: application.jobListingTitle,
-          status: application.status,
-        });
-        await sendEmailViaResend({
-          to: application.email,
-          from: NOTIFICATIONS_FROM,
-          subject,
-          html,
-        });
+        // Skip silently if the applicant has opted out.
+        const [optOut] = await db
+          .select({ email: emailOptOutsTable.email })
+          .from(emailOptOutsTable)
+          .where(eq(emailOptOutsTable.email, application.email.toLowerCase()))
+          .limit(1);
+
+        if (!optOut) {
+          const { subject, html } = buildApplicationStatusEmail({
+            firstName: application.firstName,
+            lastName: application.lastName,
+            jobTitle: application.jobListingTitle,
+            status: application.status,
+            unsubscribeUrl: buildUnsubscribeUrl(application.email),
+          });
+          await sendEmailViaResend({
+            to: application.email,
+            from: NOTIFICATIONS_FROM,
+            subject,
+            html,
+          });
+        }
       } catch (emailErr) {
         // Log but do not block — the status update already succeeded.
         req.log.error({ err: emailErr }, "Failed to send application status email");
