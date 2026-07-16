@@ -2,14 +2,14 @@ import { SEO } from '@/components/seo';
 import { Mail, MapPin, Phone, BadgeCheck } from 'lucide-react';
 import { useState } from 'react';
 import { CONTACT } from '@/lib/contact-info';
-import { useCreateBookingRequest } from '@workspace/api-client-react';
+import { createBookingRequest } from '@workspace/api-client-react';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const bookingRequest = useCreateBookingRequest();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
 
@@ -22,29 +22,25 @@ export default function Contact() {
     const service = String(formData.get('service') ?? '').trim();
     const message = String(formData.get('message') ?? '').trim();
 
-    bookingRequest.mutate(
-      {
-        data: {
-          firstName,
-          lastName,
-          email,
-          ...(phone ? { phone } : {}),
-          service,
-          message,
-        },
-      },
-      {
-        onSuccess: () => {
-          setSubmitted(true);
-          form.reset();
-        },
-        onError: () => {
-          setErrorMessage(
-            "Something went wrong sending your request. Please try again or call us directly."
-          );
-        },
-      }
-    );
+    setIsPending(true);
+    try {
+      await createBookingRequest({
+        firstName,
+        lastName,
+        email,
+        ...(phone ? { phone } : {}),
+        service,
+        message,
+      });
+      setSubmitted(true);
+      form.reset();
+    } catch {
+      setErrorMessage(
+        "Something went wrong sending your request. Please try again or call us directly."
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -188,10 +184,10 @@ export default function Contact() {
 
                   <button
                     type="submit"
-                    disabled={bookingRequest.isPending}
+                    disabled={isPending}
                     className="w-full py-4 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-all shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {bookingRequest.isPending ? 'Sending...' : 'Send Request'}
+                    {isPending ? 'Sending...' : 'Send Request'}
                   </button>
                 </form>
               )}

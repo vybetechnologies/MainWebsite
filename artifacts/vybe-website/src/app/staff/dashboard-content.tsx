@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Show, useUser, useClerk } from '@clerk/react';
-import { useListBookingRequests } from '@workspace/api-client-react';
+import { listBookingRequests } from '@workspace/api-client-react';
+import type { BookingRequestListResponse } from '@workspace/api-client-react';
 
 /** Only admins of the VYBE organization are authorized to access the staff dashboard. */
 const VYBE_ORG_ID = 'org_3GYdwBU3lsknE6GICi5mlPVoRjD';
@@ -22,7 +23,29 @@ function SignOutButton() {
 }
 
 function SubmissionsTable() {
-  const { data, isLoading, isError } = useListBookingRequests();
+  const [data, setData] = useState<BookingRequestListResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setIsError(false);
+    listBookingRequests()
+      .then((result) => {
+        if (!cancelled) {
+          setData(result);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIsError(true);
+          setIsLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading submissions…</p>;
