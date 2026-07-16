@@ -1,5 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
+import { inArray } from "drizzle-orm";
+import { db, marketplaceItemsTable } from "@workspace/db";
 import { getSquareClient, SQUARE_LOCATION_ID, moneyToNumber } from "../lib/square-client";
 
 const router: IRouter = Router();
@@ -54,14 +56,12 @@ router.post(
 
 // ── POST /api/payments/create-order-and-pay ───────────────────────────────────
 // Creates a Square Order (with named line items) then charges it.
-// Used by the public marketplace cart checkout — orders appear in Square dashboard.
+// Only allows variations whose parent Square item is staff-approved (visible=true).
 
 const LineItemSchema = z.object({
-  /** Square catalog variation ID for the item. */
   catalogVariationId: z.string().min(1),
   name: z.string().min(1).max(200),
   quantity: z.number().int().positive(),
-  /** Unit price in cents — used as a fallback if catalog lookup fails. */
   basePriceCents: z.number().int().min(0),
 });
 
@@ -85,7 +85,58 @@ router.post(
     try {
       const client = getSquareClient();
 
-      // 1. Create a Square Order with catalog variation line items
+      // ── Step 0: Validate every variation is from a staff-approved item ──────
+      const variationIds = lineItems.map((li) => li.catalogVariationId);
+
+      // Batch-fetch the variation objects to get their parent Square item IDs
+      const batchRes = await client.catalogApi.batchRetrieveCatalogObjects({
+        objectIds: variationIds,
+        includeRelatedObjects: false,
+      });
+
+      const fetchedObjects = batchRes.result.objects ?? [];
+
+      // Build a map: variationId → parentItemId
+      const variationToItemId = new Map<string, string>();
+      for (const obj of fetchedObjects) {
+        if (obj.id && obj.itemVariationData?.itemId) {
+          variationToItemId.set(obj.id, obj.itemVariationData.itemId);
+        }
+      }
+
+      // Ensure every requested variation was found
+      const missingVariations = variationIds.filter((id) => !variationToItemId.has(id));
+      if (missingVariations.length > 0) {
+        res.status(400).json({ error: "One or more items could not be found in the catalog." });
+        return;
+      }
+
+      // Collect unique parent item IDs
+      const parentItemIds = [...new Set(variationToItemId.values())];
+
+      // Check visibility for each parent item — all must be visible=true
+      const visibleRows = await db
+        .select({
+          squareItemId: marketplaceItemsTable.squareItemId,
+          visible: marketplaceItemsTable.visible,
+        })
+        .from(marketplaceItemsTable)
+        .where(inArray(marketplaceItemsTable.squareItemId, parentItemIds));
+
+      const visibleSet = new Set(
+        visibleRows.filter((r) => r.visible).map((r) => r.squareItemId),
+      );
+
+      const blockedItems = parentItemIds.filter((id) => !visibleSet.has(id));
+      if (blockedItems.length > 0) {
+        req.log.warn({ blockedItems }, "Checkout blocked: items not in approved marketplace");
+        res.status(403).json({
+          error: "One or more items in your cart are not available for purchase.",
+        });
+        return;
+      }
+
+      // ── Step 1: Create a Square Order ────────────────────────────────────────
       const orderRes = await client.ordersApi.createOrder({
         idempotencyKey: crypto.randomUUID(),
         order: {
@@ -93,7 +144,6 @@ router.post(
           lineItems: lineItems.map((item) => ({
             catalogObjectId: item.catalogVariationId,
             quantity: String(item.quantity),
-            // Name is a fallback in case catalog lookup fails server-side
             name: item.name,
           })),
         },
@@ -105,14 +155,18 @@ router.post(
         return;
       }
 
+      // ── Step 2: Charge the card against the order total ───────────────────
       const totalMoney = order.totalMoney;
+      const fallbackCents = lineItems.reduce(
+        (s, i) => s + i.basePriceCents * i.quantity,
+        0,
+      );
 
-      // 2. Charge the card against the order total
       const paymentRes = await client.paymentsApi.createPayment({
         sourceId,
         idempotencyKey: crypto.randomUUID(),
         amountMoney: {
-          amount: totalMoney?.amount ?? BigInt(lineItems.reduce((s, i) => s + i.basePriceCents * i.quantity, 0)),
+          amount: totalMoney?.amount ?? BigInt(fallbackCents),
           currency: "USD",
         },
         orderId: order.id,

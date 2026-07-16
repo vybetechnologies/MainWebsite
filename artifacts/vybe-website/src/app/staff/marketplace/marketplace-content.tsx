@@ -59,6 +59,7 @@ export default function MarketplaceContent() {
   const [error, setError] = useState<string | null>(null);
   // Track in-flight patch calls per item id
   const [patching, setPatching] = useState<Set<string>>(new Set());
+  const [patchError, setPatchError] = useState<string | null>(null);
 
   const apiBase = typeof window !== 'undefined'
     ? (resolveApiBaseUrl(window.location.hostname) ?? '')
@@ -86,16 +87,30 @@ export default function MarketplaceContent() {
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
 
+  /**
+   * PATCH a single item — returns true on success, false on failure.
+   * Callers are responsible for reverting optimistic state on false.
+   */
   const patch = useCallback(
-    async (id: string, payload: { visible?: boolean; displayOrder?: number }) => {
+    async (id: string, payload: { visible?: boolean; displayOrder?: number }): Promise<boolean> => {
       setPatching((prev) => new Set(prev).add(id));
       try {
-        await fetch(`${apiBase}/api/staff/catalog/${id}`, {
+        const res = await fetch(`${apiBase}/api/staff/catalog/${id}`, {
           method: 'PATCH',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setPatchError(data.error ?? 'Failed to save change — please try again.');
+          return false;
+        }
+        setPatchError(null);
+        return true;
+      } catch {
+        setPatchError('Network error — please try again.');
+        return false;
       } finally {
         setPatching((prev) => {
           const next = new Set(prev);
@@ -107,33 +122,41 @@ export default function MarketplaceContent() {
     [apiBase],
   );
 
-  // Optimistic visibility toggle
+  // Optimistic visibility toggle — reverts on PATCH failure
   const toggleVisible = async (id: string, current: boolean) => {
     const newVisible = !current;
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, visible: newVisible } : i)),
-    );
-    await patch(id, { visible: newVisible });
+    // Apply optimistically
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, visible: newVisible } : i)));
+    const ok = await patch(id, { visible: newVisible });
+    if (!ok) {
+      // Revert
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, visible: current } : i)));
+    }
   };
 
-  // Move an item up or down in display order
+  // Move an item up or down — reverts both rows on PATCH failure
   const moveItem = async (idx: number, dir: 'up' | 'down') => {
     const targetIdx = dir === 'up' ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= items.length) return;
 
-    // Swap optimistically
+    const snapshot = [...items];
+
+    // Apply optimistically
     const next = [...items];
     [next[idx], next[targetIdx]] = [next[targetIdx], next[idx]];
-
-    // Reassign displayOrder based on new position
     const updated = next.map((item, i) => ({ ...item, displayOrder: i }));
     setItems(updated);
 
     // Persist both affected items
-    await Promise.all([
+    const [ok1, ok2] = await Promise.all([
       patch(updated[idx].id, { displayOrder: updated[idx].displayOrder }),
       patch(updated[targetIdx].id, { displayOrder: updated[targetIdx].displayOrder }),
     ]);
+
+    if (!ok1 || !ok2) {
+      // Revert to pre-move state
+      setItems(snapshot);
+    }
   };
 
   const visibleCount = items.filter((i) => i.visible && !i.isDeleted).length;
@@ -155,6 +178,20 @@ export default function MarketplaceContent() {
           </button>
         }
       />
+
+      {/* Patch error banner */}
+      {patchError && (
+        <div className="mx-8 mt-4 rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-2.5 flex items-center justify-between gap-4 text-sm text-destructive">
+          <span>{patchError}</span>
+          <button
+            type="button"
+            onClick={() => setPatchError(null)}
+            className="shrink-0 text-xs underline hover:no-underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Stats bar */}
       {!loading && !error && (
