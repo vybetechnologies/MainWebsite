@@ -2,6 +2,7 @@ import { Heart, Rocket, ShieldCheck, GraduationCap, HeartPulse, CalendarClock } 
 import { Hero } from '@/components/shared/hero';
 import { ServiceCard } from '@/components/shared/service-card';
 import { CareersInterestForm } from '@/components/careers/interest-form';
+import { JobListingsSection } from '@/components/careers/job-listings-section';
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
@@ -44,8 +45,8 @@ export default function CareersPage() {
             Small team, real ownership.
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed mt-6">
-            Everyone at VYBE works close to the customer — whether that's a family fixing their
-            first computer or a business rolling out managed IT. We move quickly, communicate
+            Everyone at VYBE works close to the customer — whether that&apos;s a family fixing
+            their first computer or a business rolling out managed IT. We move quickly, communicate
             directly, and expect everyone to bring their full effort and their full self to the
             work.
           </p>
@@ -81,16 +82,14 @@ export default function CareersPage() {
             Current Openings
           </p>
           <h2 className="text-3xl md:text-5xl font-display font-bold">Open Roles</h2>
-        </div>
-        <div className="rounded-2xl border border-card-border bg-card p-10 text-center max-w-2xl">
-          <p className="text-lg text-muted-foreground">
-            There are no open roles right now, but we are always interested in meeting talented
-            people.
+          <p className="text-muted-foreground text-lg mt-4">
+            Join a team that builds things people actually use and care about.
           </p>
         </div>
+        <JobListingsSection />
       </section>
 
-      <section className="container mx-auto px-6 md:px-12 pb-24">
+      <section id="careers-form" className="container mx-auto px-6 md:px-12 pb-24">
         <div className="max-w-2xl mx-auto rounded-3xl border border-card-border bg-card p-8 md:p-12">
           <div className="mb-8">
             <p className="text-sm font-semibold tracking-widest uppercase text-primary mb-4">
@@ -100,7 +99,7 @@ export default function CareersPage() {
               Introduce yourself.
             </h2>
             <p className="text-muted-foreground mt-3">
-              Send us your background and what kind of work excites you — we'll reach out when a
+              Send us your background and what kind of work excites you — we&apos;ll reach out when a
               fit opens up.
             </p>
           </div>

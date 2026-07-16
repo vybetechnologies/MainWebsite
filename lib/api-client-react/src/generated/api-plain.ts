@@ -1,7 +1,7 @@
 /**
- * Plain async fetch functions extracted from the orval-generated api.ts.
- * This file intentionally has NO @tanstack/react-query imports so it can be
- * tree-shaken cleanly. Hooks live in api.ts; import from there when you need them.
+ * Plain async fetch functions — no @tanstack/react-query imports, safe to
+ * import anywhere (including 'use client' components on static-export pages).
+ * React Query hooks live in api.ts; import from there when you need them.
  */
 import type {
   BookingRequestInput,
@@ -16,14 +16,12 @@ import type {
 import { customFetch } from '../custom-fetch';
 import type { ErrorType, BodyType } from '../custom-fetch';
 
-// Suppress unused-type lint warnings for re-exported API types
 export type { ErrorType, BodyType };
 
 // ── Health check ──────────────────────────────────────────────────────────────
 
 export const getHealthCheckUrl = () => `/api/healthz`;
 
-/** @summary Health check */
 export const healthCheck = async (options?: RequestInit): Promise<HealthStatus> =>
   customFetch<HealthStatus>(getHealthCheckUrl(), { ...options, method: 'GET' });
 
@@ -31,7 +29,6 @@ export const healthCheck = async (options?: RequestInit): Promise<HealthStatus> 
 
 export const getCreateBookingRequestUrl = () => `/api/booking-requests`;
 
-/** @summary Submit a booking / contact request */
 export const createBookingRequest = async (
   bookingRequestInput: BookingRequestInput,
   options?: RequestInit,
@@ -45,7 +42,6 @@ export const createBookingRequest = async (
 
 export const getListBookingRequestsUrl = () => `/api/booking-requests`;
 
-/** @summary List submitted booking / contact / careers requests */
 export const listBookingRequests = async (
   options?: RequestInit,
 ): Promise<BookingRequestListResponse> =>
@@ -54,8 +50,86 @@ export const listBookingRequests = async (
     method: 'GET',
   });
 
-// Re-export types consumed by callers
 export type { BookingRequestInput, BookingRequestListResponse, BookingRequestResult };
+
+// ── Job listings (public) ─────────────────────────────────────────────────────
+
+export interface JobListing {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  description: string;
+  requirements: string | null;
+  salaryRange: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobListingsResponse {
+  listings: JobListing[];
+}
+
+export interface CreateJobListingInput {
+  title: string;
+  department: string;
+  location?: string;
+  type?: string;
+  description: string;
+  requirements?: string;
+  salaryRange?: string;
+  isActive?: boolean;
+}
+
+export type UpdateJobListingInput = Partial<CreateJobListingInput>;
+
+export const getJobListingsUrl = () => `/api/job-listings`;
+
+/** Public — returns only active listings. */
+export const getJobListings = async (options?: RequestInit): Promise<JobListingsResponse> =>
+  customFetch<JobListingsResponse>(getJobListingsUrl(), { ...options, method: 'GET' });
+
+export const getStaffJobListingsUrl = () => `/api/staff/job-listings`;
+
+/** Staff-auth — returns all listings including inactive. */
+export const getStaffJobListings = async (
+  options?: RequestInit,
+): Promise<JobListingsResponse> =>
+  customFetch<JobListingsResponse>(getStaffJobListingsUrl(), { ...options, method: 'GET' });
+
+export const createJobListing = async (
+  input: CreateJobListingInput,
+  options?: RequestInit,
+): Promise<{ listing: JobListing }> =>
+  customFetch<{ listing: JobListing }>('/api/staff/job-listings', {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(input),
+  });
+
+export const updateJobListing = async (
+  id: string,
+  input: UpdateJobListingInput,
+  options?: RequestInit,
+): Promise<{ listing: JobListing }> =>
+  customFetch<{ listing: JobListing }>(`/api/staff/job-listings/${id}`, {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(input),
+  });
+
+export const deleteJobListing = async (
+  id: string,
+  options?: RequestInit,
+): Promise<{ ok: boolean }> =>
+  customFetch<{ ok: boolean }>(`/api/staff/job-listings/${id}`, {
+    ...options,
+    method: 'DELETE',
+  });
 
 // ── Staff analytics ───────────────────────────────────────────────────────────
 
@@ -69,7 +143,6 @@ export interface StaffAnalyticsResponse {
 export const getStaffAnalyticsUrl = (days?: number) =>
   `/api/staff/analytics${days ? `?days=${days}` : ''}`;
 
-/** @summary Clerk-protected page-view analytics for the staff dashboard */
 export const getStaffAnalytics = async (
   days?: number,
   options?: RequestInit,
@@ -79,11 +152,10 @@ export const getStaffAnalytics = async (
     method: 'GET',
   });
 
-// ── Storage: presigned upload URL ─────────────────────────────────────────────
+// ── Storage ───────────────────────────────────────────────────────────────────
 
 export const getRequestUploadUrlUrl = () => `/api/storage/uploads/request-url`;
 
-/** @summary Request a presigned URL for file upload */
 export const requestUploadUrl = async (
   uploadUrlRequest: UploadUrlRequest,
   options?: RequestInit,
@@ -97,21 +169,15 @@ export const requestUploadUrl = async (
 
 export type { UploadUrlRequest, UploadUrlResponse };
 
-// ── Storage: public object ────────────────────────────────────────────────────
-
 export const getGetPublicObjectUrl = (filePath: string) =>
   `/api/storage/public-objects/${filePath}`;
 
-/** @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS */
 export const getPublicObject = async (filePath: string, options?: RequestInit): Promise<Blob> =>
   customFetch<Blob>(getGetPublicObjectUrl(filePath), { ...options, method: 'GET' });
-
-// ── Storage: private object ───────────────────────────────────────────────────
 
 export const getGetStorageObjectUrl = (objectPath: string) =>
   `/api/storage/objects/${objectPath}`;
 
-/** @summary Serve an object entity from PRIVATE_OBJECT_DIR */
 export const getStorageObject = async (
   objectPath: string,
   options?: RequestInit,

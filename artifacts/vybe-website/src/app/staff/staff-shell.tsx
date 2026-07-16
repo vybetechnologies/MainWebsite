@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser, useClerk, Show } from '@clerk/react';
-import { LayoutDashboard, Inbox, BarChart2, LogOut } from 'lucide-react';
+import { LayoutDashboard, Inbox, BarChart2, LogOut, Briefcase } from 'lucide-react';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -13,6 +13,7 @@ export const VYBE_ORG_ID = 'org_3GYdwBU3lsknE6GICi5mlPVoRjD';
 const NAV = [
   { href: '/staff', label: 'Overview', icon: LayoutDashboard, exact: true },
   { href: '/staff/submissions', label: 'Submissions', icon: Inbox, exact: false },
+  { href: '/staff/careers', label: 'Careers', icon: Briefcase, exact: false },
   { href: '/staff/analytics', label: 'Analytics', icon: BarChart2, exact: false },
 ];
 

@@ -19,3 +19,4 @@
 
 export * from "./page-views";
 export * from "./booking-requests";
+export * from "./job-listings";
