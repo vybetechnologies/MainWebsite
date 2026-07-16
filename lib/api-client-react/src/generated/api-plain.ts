@@ -57,6 +57,28 @@ export const listBookingRequests = async (
 // Re-export types consumed by callers
 export type { BookingRequestInput, BookingRequestListResponse, BookingRequestResult };
 
+// ── Staff analytics ───────────────────────────────────────────────────────────
+
+export interface StaffAnalyticsResponse {
+  sinceDate: string;
+  days: number;
+  totalsByPath: { path: string; totalViews: number }[];
+  dailyRows: { path: string; viewDate: string; count: number }[];
+}
+
+export const getStaffAnalyticsUrl = (days?: number) =>
+  `/api/staff/analytics${days ? `?days=${days}` : ''}`;
+
+/** @summary Clerk-protected page-view analytics for the staff dashboard */
+export const getStaffAnalytics = async (
+  days?: number,
+  options?: RequestInit,
+): Promise<StaffAnalyticsResponse> =>
+  customFetch<StaffAnalyticsResponse>(getStaffAnalyticsUrl(days), {
+    ...options,
+    method: 'GET',
+  });
+
 // ── Storage: presigned upload URL ─────────────────────────────────────────────
 
 export const getRequestUploadUrlUrl = () => `/api/storage/uploads/request-url`;

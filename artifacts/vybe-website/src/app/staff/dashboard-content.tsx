@@ -1,158 +1,229 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Show, useUser, useClerk } from '@clerk/react';
+import { ArrowRight, Inbox, BarChart2, RefreshCw } from 'lucide-react';
 import { listBookingRequests } from '@workspace/api-client-react';
-import type { BookingRequestListResponse } from '@workspace/api-client-react';
+import type { BookingRequestRecord } from '@workspace/api-client-react';
+import {
+  StaffAuthGate,
+  StaffPageHeader,
+  StatCard,
+  ServiceBadge,
+} from './staff-shell';
 
-/** Only admins of the VYBE organization are authorized to access the staff dashboard. */
-const VYBE_ORG_ID = 'org_3GYdwBU3lsknE6GICi5mlPVoRjD';
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-function SignOutButton() {
-  const { signOut } = useClerk();
-  return (
-    <button
-      type="button"
-      onClick={() => signOut({ redirectUrl: '/staff/sign-in' })}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-    >
-      Sign out
-    </button>
-  );
+function isoToday(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
-function SubmissionsTable() {
-  const [data, setData] = useState<BookingRequestListResponse | null>(null);
+function isoWeekAgo(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  return d.toISOString().slice(0, 10);
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+// ── Overview content ──────────────────────────────────────────────────────────
+
+function OverviewContent() {
+  const [requests, setRequests] = useState<BookingRequestRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const load = () => {
     setIsLoading(true);
     setIsError(false);
     listBookingRequests()
-      .then((result) => {
-        if (!cancelled) {
-          setData(result);
-          setIsLoading(false);
-        }
+      .then((r) => {
+        setRequests(r.requests);
+        setIsLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setIsError(true);
-          setIsLoading(false);
-        }
+        setIsError(true);
+        setIsLoading(false);
       });
-    return () => { cancelled = true; };
-  }, []);
+  };
 
-  if (isLoading) {
-    return <p className="text-muted-foreground">Loading submissions…</p>;
-  }
-  if (isError) {
-    return (
-      <p className="text-destructive">
-        Couldn&rsquo;t load submissions. Make sure your account is authorized and try again.
-      </p>
-    );
-  }
+  useEffect(() => { load(); }, []);
 
-  const requests = data?.requests ?? [];
-  if (requests.length === 0) {
-    return <p className="text-muted-foreground">No submissions yet.</p>;
+  const today = isoToday();
+  const weekAgo = isoWeekAgo();
+
+  const totalCount = requests.length;
+  const todayCount = requests.filter((r) => r.createdAt.slice(0, 10) === today).length;
+  const weekCount = requests.filter((r) => r.createdAt.slice(0, 10) >= weekAgo).length;
+
+  // Service type breakdown
+  const byService: Record<string, number> = {};
+  for (const r of requests) {
+    byService[r.service] = (byService[r.service] ?? 0) + 1;
   }
+  const topServices = Object.entries(byService)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const recent = requests.slice(0, 6);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-white/10">
-      <table className="w-full text-sm">
-        <thead className="bg-card text-left text-muted-foreground">
-          <tr>
-            <th className="px-4 py-3 font-medium">Received</th>
-            <th className="px-4 py-3 font-medium">Name</th>
-            <th className="px-4 py-3 font-medium">Contact</th>
-            <th className="px-4 py-3 font-medium">Type</th>
-            <th className="px-4 py-3 font-medium">Message</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/5">
-          {requests.map((r) => (
-            <tr key={r.id} className="align-top">
-              <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                {new Date(r.createdAt).toLocaleString()}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap">
-                {r.firstName} {r.lastName}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap">
-                <a href={`mailto:${r.email}`} className="text-primary hover:underline">
-                  {r.email}
-                </a>
-                {r.phone ? <div className="text-muted-foreground">{r.phone}</div> : null}
-              </td>
-              <td className="px-4 py-3 whitespace-nowrap">{r.service}</td>
-              <td className="px-4 py-3 max-w-md">{r.message}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <StaffPageHeader
+        title="Overview"
+        description="A summary of recent activity across all submissions."
+        action={
+          <button
+            type="button"
+            onClick={load}
+            disabled={isLoading}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+          >
+            <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
+        }
+      />
+
+      <div className="px-8 py-8 space-y-8">
+        {/* Stat cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <StatCard label="Total submissions" value={isLoading ? '—' : totalCount} />
+          <StatCard label="This week" value={isLoading ? '—' : weekCount} sub="last 7 days" />
+          <StatCard label="Today" value={isLoading ? '—' : todayCount} />
+        </div>
+
+        {isError && (
+          <p className="text-sm text-destructive">
+            Couldn&rsquo;t load submissions. Check your connection and refresh.
+          </p>
+        )}
+
+        <div className="grid lg:grid-cols-[1fr_280px] gap-6">
+          {/* Recent submissions */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide">
+                Recent submissions
+              </h2>
+              <Link
+                href="/staff/submissions"
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                View all <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            {isLoading ? (
+              <div className="space-y-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-16 rounded-xl bg-card/60 animate-pulse" />
+                ))}
+              </div>
+            ) : recent.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No submissions yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {recent.map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-start gap-4 rounded-xl border border-white/8 bg-card/40 px-4 py-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium">
+                          {r.firstName} {r.lastName}
+                        </span>
+                        <ServiceBadge service={r.service} />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{r.message}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0 mt-0.5">
+                      {formatDate(r.createdAt)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Breakdown by type */}
+          <section>
+            <h2 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide mb-4">
+              By type
+            </h2>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-10 rounded-lg bg-card/60 animate-pulse" />
+                ))}
+              </div>
+            ) : topServices.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No data yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {topServices.map(([service, count]) => (
+                  <div
+                    key={service}
+                    className="flex items-center justify-between rounded-lg border border-white/8 bg-card/40 px-4 py-3"
+                  >
+                    <ServiceBadge service={service} />
+                    <span className="text-sm font-semibold tabular-nums">{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Quick links */}
+        <div className="grid sm:grid-cols-2 gap-4 pt-2">
+          <Link
+            href="/staff/submissions"
+            className="group flex items-center justify-between rounded-xl border border-white/10 bg-card/40 px-5 py-4 hover:border-primary/30 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Inbox size={18} className="text-primary" />
+              <div>
+                <p className="text-sm font-medium">Submissions</p>
+                <p className="text-xs text-muted-foreground">Filter, search, and view details</p>
+              </div>
+            </div>
+            <ArrowRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+          </Link>
+
+          <Link
+            href="/staff/analytics"
+            className="group flex items-center justify-between rounded-xl border border-white/10 bg-card/40 px-5 py-4 hover:border-primary/30 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <BarChart2 size={18} className="text-primary" />
+              <div>
+                <p className="text-sm font-medium">Analytics</p>
+                <p className="text-xs text-muted-foreground">Page views and traffic trends</p>
+              </div>
+            </div>
+            <ArrowRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default function StaffDashboardPage() {
-  const { user, isLoaded } = useUser();
+// ── Page export ───────────────────────────────────────────────────────────────
 
-  const isAuthorized = useMemo(() => {
-    if (!user) return false;
-    return user.organizationMemberships.some(
-      (m) => m.organization.id === VYBE_ORG_ID && m.role === 'org:admin',
-    );
-  }, [user]);
-
+export default function DashboardContent() {
   return (
-    <div className="container mx-auto px-6 md:px-12 py-16 flex-1">
-      <Show when="signed-out">
-        <div className="flex flex-col items-center gap-4 py-24 text-center">
-          <h1 className="font-display text-2xl font-semibold">Staff sign-in required</h1>
-          <p className="text-muted-foreground max-w-sm">
-            This page is for authorized VYBE staff only.
-          </p>
-          <Link
-            href="/staff/sign-in"
-            className="rounded-lg bg-primary px-5 py-2.5 font-medium text-primary-foreground"
-          >
-            Sign in
-          </Link>
-        </div>
-      </Show>
-      <Show when="signed-in">
-        {!isLoaded ? (
-          <p className="text-muted-foreground">Loading…</p>
-        ) : !isAuthorized ? (
-          <div className="flex flex-col items-center gap-3 py-24 text-center">
-            <h1 className="font-display text-2xl font-semibold">Not authorized</h1>
-            <p className="text-muted-foreground max-w-sm">
-              Your account isn&rsquo;t an admin of the VYBE organization. Contact an administrator
-              if you believe this is a mistake.
-            </p>
-            <SignOutButton />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-display text-2xl font-semibold">Submissions</h1>
-                <p className="text-muted-foreground">
-                  Contact, booking, and careers requests submitted through the site.
-                </p>
-              </div>
-              <SignOutButton />
-            </div>
-            <SubmissionsTable />
-          </div>
-        )}
-      </Show>
-    </div>
+    <StaffAuthGate>
+      <OverviewContent />
+    </StaffAuthGate>
   );
 }
