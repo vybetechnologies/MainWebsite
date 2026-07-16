@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import {
   ChevronDown,
   ChevronUp,
@@ -38,6 +38,13 @@ function formatDateTime(iso: string): string {
     hour: 'numeric',
     minute: '2-digit',
   });
+}
+
+const POLL_INTERVAL_MS = 30_000;
+
+/** Returns the newest createdAt ISO string among a list, or '' if empty. */
+function newestAt(items: BookingRequestRecord[]): string {
+  return items.reduce((acc, r) => (r.createdAt > acc ? r.createdAt : acc), '');
 }
 
 // ── Detail row ────────────────────────────────────────────────────────────────
@@ -90,16 +97,52 @@ function SubmissionsTable() {
   const [isError, setIsError] = useState(false);
   const [filter, setFilter] = useState<Filter>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [newCount, setNewCount] = useState(0);
+
+  // Tracks the newest createdAt that staff have actually seen in the table.
+  const seenLatestAtRef = useRef<string>('');
+
+  const applyResults = (items: BookingRequestRecord[]) => {
+    setRequests(items);
+    seenLatestAtRef.current = newestAt(items);
+    setNewCount(0);
+  };
 
   const load = () => {
     setIsLoading(true);
     setIsError(false);
     listBookingRequests()
-      .then((r) => { setRequests(r.requests); setIsLoading(false); })
-      .catch(() => { setIsError(true); setIsLoading(false); });
+      .then((r) => {
+        applyResults(r.requests);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsError(true);
+        setIsLoading(false);
+      });
   };
 
-  useEffect(() => { load(); }, []);
+  // Silent background poll — does not touch isLoading so the table stays visible.
+  const poll = () => {
+    listBookingRequests()
+      .then((r) => {
+        const latest = newestAt(r.requests);
+        if (latest && latest > seenLatestAtRef.current) {
+          const count = r.requests.filter((x) => x.createdAt > seenLatestAtRef.current).length;
+          setNewCount(count);
+        }
+      })
+      .catch(() => {
+        // Silently ignore poll errors — don't disturb the UI.
+      });
+  };
+
+  useEffect(() => {
+    load();
+    const id = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(
     () => requests.filter((r) => matchesFilter(r, filter)),
@@ -115,15 +158,29 @@ function SubmissionsTable() {
         title="Submissions"
         description={`${filtered.length} of ${requests.length} submissions`}
         action={
-          <button
-            type="button"
-            onClick={load}
-            disabled={isLoading}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
-          >
-            <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            {newCount > 0 && (
+              <button
+                type="button"
+                onClick={load}
+                className="flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/25 transition-colors"
+              >
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                  {newCount}
+                </span>
+                new — click to load
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={load}
+              disabled={isLoading}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+            >
+              <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
         }
       />
 

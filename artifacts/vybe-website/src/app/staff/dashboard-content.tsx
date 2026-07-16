@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Inbox, BarChart2, RefreshCw } from 'lucide-react';
 import { listBookingRequests } from '@workspace/api-client-react';
@@ -33,19 +33,36 @@ function formatDate(iso: string): string {
   });
 }
 
+const POLL_INTERVAL_MS = 30_000;
+
+/** Returns the newest createdAt ISO string among a list, or '' if empty. */
+function newestAt(items: BookingRequestRecord[]): string {
+  return items.reduce((acc, r) => (r.createdAt > acc ? r.createdAt : acc), '');
+}
+
 // ── Overview content ──────────────────────────────────────────────────────────
 
 function OverviewContent() {
   const [requests, setRequests] = useState<BookingRequestRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [newCount, setNewCount] = useState(0);
+
+  // Tracks the newest createdAt that staff have actually seen.
+  const seenLatestAtRef = useRef<string>('');
+
+  const applyResults = (items: BookingRequestRecord[]) => {
+    setRequests(items);
+    seenLatestAtRef.current = newestAt(items);
+    setNewCount(0);
+  };
 
   const load = () => {
     setIsLoading(true);
     setIsError(false);
     listBookingRequests()
       .then((r) => {
-        setRequests(r.requests);
+        applyResults(r.requests);
         setIsLoading(false);
       })
       .catch(() => {
@@ -54,7 +71,27 @@ function OverviewContent() {
       });
   };
 
-  useEffect(() => { load(); }, []);
+  // Silent background poll — does not touch isLoading so stats stay visible.
+  const poll = () => {
+    listBookingRequests()
+      .then((r) => {
+        const latest = newestAt(r.requests);
+        if (latest && latest > seenLatestAtRef.current) {
+          const count = r.requests.filter((x) => x.createdAt > seenLatestAtRef.current).length;
+          setNewCount(count);
+        }
+      })
+      .catch(() => {
+        // Silently ignore poll errors — don't disturb the UI.
+      });
+  };
+
+  useEffect(() => {
+    load();
+    const id = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const today = isoToday();
   const weekAgo = isoWeekAgo();
@@ -80,15 +117,29 @@ function OverviewContent() {
         title="Overview"
         description="A summary of recent activity across all submissions."
         action={
-          <button
-            type="button"
-            onClick={load}
-            disabled={isLoading}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
-          >
-            <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            {newCount > 0 && (
+              <button
+                type="button"
+                onClick={load}
+                className="flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/25 transition-colors"
+              >
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                  {newCount}
+                </span>
+                new — click to load
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={load}
+              disabled={isLoading}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+            >
+              <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
         }
       />
 
