@@ -127,7 +127,7 @@ const PARTNERS: Partner[] = [
     logo: '/partners/wave.svg',
     category: 'Banking & Finance',
     description:
-      'Wave Advisors supports VYBE's financial operations with expert accounting, bookkeeping, and advisory services — helping us maintain clean books, stay tax-ready, and make data-driven financial decisions as we scale.',
+      "Wave Advisors supports VYBE's financial operations with expert accounting, bookkeeping, and advisory services — helping us maintain clean books, stay tax-ready, and make data-driven financial decisions as we scale.",
     website: 'https://waveapps.com',
   },
 ];
