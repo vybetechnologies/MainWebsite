@@ -10,6 +10,9 @@ const PARTNERS = [
   { name: "MobileSentrix", logo: "/partners/mobilesentrix.png" },
   { name: "Grasshopper", logo: "/partners/grasshopper.png" },
   { name: "Square", logo: "/partners/square.svg" },
+  { name: "Bluevine", logo: "/partners/bluevine.svg" },
+  { name: "Stripe", logo: "/partners/stripe.svg" },
+  { name: "Wave Advisors", logo: "/partners/wave.svg" },
 ];
 
 export function Partners() {

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" fill="none">
+  <!-- Leaf/check mark icon -->
+  <path d="M22 40 C22 28 30 18 44 16 C36 26 36 38 44 46 C50 52 60 54 68 50 C62 62 48 68 36 64 C26 60 22 52 22 40Z" fill="#00B67A"/>
+  <path d="M44 16 C52 8 64 6 72 12 C66 20 60 28 54 34 C48 40 42 44 44 46 C36 38 36 26 44 16Z" fill="#00D68F"/>
+  <!-- Bluevine text -->
+  <text x="88" y="50" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1A1A2E" letter-spacing="-0.5">bluevine</text>
+</svg>
