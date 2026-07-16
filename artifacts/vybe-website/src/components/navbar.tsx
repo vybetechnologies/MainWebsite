@@ -16,6 +16,7 @@ import { useCart } from '@/lib/cart-context';
 interface NavItem {
   label: string;
   href: string;
+  external?: boolean;
   megaMenu?: { label: string; href: string; description?: string }[];
 }
 
@@ -44,6 +45,7 @@ const NAV_LINKS: NavItem[] = [
     ],
   },
   { label: 'Tech Rescue', href: '/tech-rescue' },
+  { label: 'Shop', href: 'https://marketplace.vybetechnologies.net', external: true },
   { label: 'About', href: '/about' },
   { label: 'Partners', href: '/partners' },
   { label: 'Newsroom', href: '/newsroom' },
@@ -57,6 +59,18 @@ function NavLinkItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const [open, setOpen] = useState(false);
 
   if (!item.megaMenu) {
+    if (item.external) {
+      return (
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-medium transition-colors hover:text-primary text-foreground/80"
+        >
+          {item.label}
+        </a>
+      );
+    }
     return (
       <Link
         href={item.href}
@@ -419,18 +433,31 @@ export function Navbar() {
               transition={{ duration: 0.2 }}
               className="absolute top-0 left-0 w-full h-screen bg-background border-b border-border lg:hidden flex flex-col pt-24 px-6 pb-6 gap-6 overflow-y-auto"
             >
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`text-2xl font-display font-semibold transition-colors ${
-                    pathname === link.href ? 'text-primary' : 'text-foreground'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) =>
+                link.external ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-2xl font-display font-semibold transition-colors text-foreground"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-2xl font-display font-semibold transition-colors ${
+                      pathname === link.href ? 'text-primary' : 'text-foreground'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
 
               <div className="flex items-center justify-center gap-6">
                 <NavAuthSection mobile onClose={() => setMobileMenuOpen(false)} />

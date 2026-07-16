@@ -192,6 +192,14 @@ export default function ShopContent() {
           Products and services from VYBE Technologies. Add items to your cart and check out
           securely with Square.
         </p>
+        <a
+          href="https://marketplace.vybetechnologies.net"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mt-2 px-5 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-300 glow-primary"
+        >
+          Visit our Square store ↗
+        </a>
       </div>
 
       {/* Toolbar */}
