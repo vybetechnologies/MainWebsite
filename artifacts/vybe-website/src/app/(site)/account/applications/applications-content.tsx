@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/react';
+import { useAuth } from '@clerk/react';
 import { FileText, Plus, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { resolveApiBaseUrl } from '@/lib/api-base';
@@ -71,7 +71,7 @@ function EmptyState() {
         </p>
       </div>
       <Link
-        href="/careers#open-roles"
+        href="/careers"
         className="flex items-center gap-2 text-sm text-primary hover:underline"
       >
         <Plus size={14} />
@@ -84,22 +84,31 @@ function EmptyState() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function ApplicationsContent() {
-  const { user, isLoaded } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !user) return;
-    const email = user.primaryEmailAddress?.emailAddress;
-    if (!email) { setLoading(false); return; }
+    if (!isLoaded || !isSignedIn) return;
 
-    const base = resolveApiBaseUrl(window.location.hostname) ?? '';
-    fetch(`${base}/api/account/applications?email=${encodeURIComponent(email)}`)
-      .then((r) => r.json())
-      .then((data) => { setApplications(data.applications ?? []); setLoading(false); })
-      .catch(() => { setError('Could not load applications.'); setLoading(false); });
-  }, [isLoaded, user]);
+    (async () => {
+      try {
+        const token = await getToken();
+        const base = resolveApiBaseUrl(window.location.hostname) ?? '';
+        const res = await fetch(`${base}/api/account/applications`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        setApplications(data.applications ?? []);
+      } catch {
+        setError('Could not load applications.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [isLoaded, isSignedIn, getToken]);
 
   return (
     <div className="space-y-6">

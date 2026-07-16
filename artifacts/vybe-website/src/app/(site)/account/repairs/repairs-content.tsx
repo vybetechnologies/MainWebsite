@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/react';
+import { useAuth } from '@clerk/react';
 import { Wrench, Plus, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { resolveApiBaseUrl } from '@/lib/api-base';
@@ -70,22 +70,31 @@ function EmptyState() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function RepairsContent() {
-  const { user, isLoaded } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const [repairs, setRepairs] = useState<Repair[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !user) return;
-    const email = user.primaryEmailAddress?.emailAddress;
-    if (!email) { setLoading(false); return; }
+    if (!isLoaded || !isSignedIn) return;
 
-    const base = resolveApiBaseUrl(window.location.hostname) ?? '';
-    fetch(`${base}/api/account/repairs?email=${encodeURIComponent(email)}`)
-      .then((r) => r.json())
-      .then((data) => { setRepairs(data.repairs ?? []); setLoading(false); })
-      .catch(() => { setError('Could not load repairs.'); setLoading(false); });
-  }, [isLoaded, user]);
+    (async () => {
+      try {
+        const token = await getToken();
+        const base = resolveApiBaseUrl(window.location.hostname) ?? '';
+        const res = await fetch(`${base}/api/account/repairs`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        setRepairs(data.repairs ?? []);
+      } catch {
+        setError('Could not load repairs.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [isLoaded, isSignedIn, getToken]);
 
   return (
     <div className="space-y-6">
