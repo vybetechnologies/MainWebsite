@@ -738,3 +738,61 @@ describe("PATCH /api/staff/catalog/:id", () => {
     expect(body).toHaveProperty("error");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/staff/catalog — merged shape + defaults
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("GET /api/staff/catalog", () => {
+  it("returns 200 with a well-formed items array containing merged Square + DB fields", async () => {
+    // DB has ITEM_001 marked visible with displayOrder=3
+    dbMock.visibleRows = [{ squareItemId: "ITEM_001", visible: true, displayOrder: 3 }];
+
+    const { status, body } = await get("/api/staff/catalog");
+
+    expect(status).toBe(200);
+    expect(body).toHaveProperty("items");
+    expect(Array.isArray(body.items)).toBe(true);
+
+    const item = body.items[0];
+    // Square-sourced fields must be present
+    expect(item).toMatchObject({
+      id: "ITEM_001",
+      name: expect.any(String),
+      description: expect.any(String),
+      imageIds: expect.any(Array),
+      variations: expect.any(Array),
+    });
+    // DB-merged fields must be present with the correct DB values
+    expect(item).toMatchObject({
+      visible: true,
+      displayOrder: 3,
+    });
+  });
+
+  it("defaults visible=false and assigns a fallback displayOrder for items not yet in the DB", async () => {
+    // DB is empty — ITEM_001 from Square has no row yet
+    dbMock.visibleRows = [];
+
+    const { status, body } = await get("/api/staff/catalog");
+
+    expect(status).toBe(200);
+    expect(body.items).toHaveLength(1);
+
+    const item = body.items[0];
+    expect(item.id).toBe("ITEM_001");
+    // Must default to hidden, not visible
+    expect(item.visible).toBe(false);
+    // displayOrder must be a number (the fallback index)
+    expect(typeof item.displayOrder).toBe("number");
+  });
+
+  it("returns 503 when Square is unavailable", async () => {
+    squareMock.available = false;
+
+    const { status, body } = await get("/api/staff/catalog");
+
+    expect(status).toBe(503);
+    expect(body).toHaveProperty("error");
+  });
+});
