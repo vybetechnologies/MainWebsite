@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { startPageViewCleanupJob } from "./jobs/pageViewCleanup";
+import { validateSquareCredentials } from "./lib/square-client";
 
 const rawPort = process.env["PORT"];
 
@@ -24,4 +25,10 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
   startPageViewCleanupJob();
+
+  // Validate Square credentials in the background so the server is ready
+  // immediately. Square routes return 503 until this resolves successfully.
+  validateSquareCredentials().catch((err) => {
+    logger.error({ err }, "Unexpected error during Square credential validation");
+  });
 });

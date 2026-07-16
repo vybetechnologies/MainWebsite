@@ -3,7 +3,7 @@ import { eq, asc } from "drizzle-orm";
 import { db, marketplaceItemsTable } from "@workspace/db";
 import { z } from "zod";
 import type { CatalogObject } from "square";
-import { getSquareClient, moneyToNumber } from "../lib/square-client";
+import { getSquareClient, isSquareAvailable, moneyToNumber } from "../lib/square-client";
 import { requireStaffAuth } from "../lib/staff-auth";
 
 const router: IRouter = Router();
@@ -73,6 +73,10 @@ async function fetchSquareCatalogItems(): Promise<SquareCatalogItem[]> {
 router.get(
   "/catalog/items",
   async (req: Request, res: Response): Promise<void> => {
+    if (!isSquareAvailable()) {
+      res.status(503).json({ error: "Shop is temporarily unavailable. Please try again later." });
+      return;
+    }
     try {
       // Fetch visibility state from DB
       const visibleRows = await db
@@ -117,6 +121,10 @@ router.get(
   "/staff/catalog",
   requireStaffAuth,
   async (req: Request, res: Response): Promise<void> => {
+    if (!isSquareAvailable()) {
+      res.status(503).json({ error: "Square integration is temporarily unavailable." });
+      return;
+    }
     try {
       const [squareItems, dbRows] = await Promise.all([
         fetchSquareCatalogItems(),

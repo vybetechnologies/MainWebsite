@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { inArray } from "drizzle-orm";
 import { db, marketplaceItemsTable } from "@workspace/db";
-import { getSquareClient, SQUARE_LOCATION_ID, moneyToNumber } from "../lib/square-client";
+import { getSquareClient, isSquareAvailable, SQUARE_LOCATION_ID, moneyToNumber } from "../lib/square-client";
 
 const router: IRouter = Router();
 
@@ -19,6 +19,11 @@ const CreatePaymentBody = z.object({
 router.post(
   "/payments/create-payment",
   async (req: Request, res: Response): Promise<void> => {
+    if (!isSquareAvailable()) {
+      res.status(503).json({ error: "Payment processing is temporarily unavailable. Please try again later." });
+      return;
+    }
+
     const parsed = CreatePaymentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
@@ -74,6 +79,11 @@ const CreateOrderAndPayBody = z.object({
 router.post(
   "/payments/create-order-and-pay",
   async (req: Request, res: Response): Promise<void> => {
+    if (!isSquareAvailable()) {
+      res.status(503).json({ error: "Payment processing is temporarily unavailable. Please try again later." });
+      return;
+    }
+
     const parsed = CreateOrderAndPayBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
