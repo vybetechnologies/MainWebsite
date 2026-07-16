@@ -85,19 +85,11 @@ export interface CreateJobListingInput {
 
 export type UpdateJobListingInput = Partial<CreateJobListingInput>;
 
-export const getJobListingsUrl = () => `/api/job-listings`;
-
-/** Public — returns only active listings. */
 export const getJobListings = async (options?: RequestInit): Promise<JobListingsResponse> =>
-  customFetch<JobListingsResponse>(getJobListingsUrl(), { ...options, method: 'GET' });
+  customFetch<JobListingsResponse>('/api/job-listings', { ...options, method: 'GET' });
 
-export const getStaffJobListingsUrl = () => `/api/staff/job-listings`;
-
-/** Staff-auth — returns all listings including inactive. */
-export const getStaffJobListings = async (
-  options?: RequestInit,
-): Promise<JobListingsResponse> =>
-  customFetch<JobListingsResponse>(getStaffJobListingsUrl(), { ...options, method: 'GET' });
+export const getStaffJobListings = async (options?: RequestInit): Promise<JobListingsResponse> =>
+  customFetch<JobListingsResponse>('/api/staff/job-listings', { ...options, method: 'GET' });
 
 export const createJobListing = async (
   input: CreateJobListingInput,
@@ -131,6 +123,99 @@ export const deleteJobListing = async (
     method: 'DELETE',
   });
 
+// ── Job applications ──────────────────────────────────────────────────────────
+
+export const APPLICATION_STATUSES = [
+  'new',
+  'reviewing',
+  'interview',
+  'offer',
+  'hired',
+  'rejected',
+  'withdrawn',
+] as const;
+
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+export interface JobApplication {
+  id: string;
+  jobListingId: string;
+  jobListingTitle: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  coverLetter: string;
+  resumeObjectPath: string | null;
+  linkedinUrl: string | null;
+  portfolioUrl: string | null;
+  availability: string | null;
+  status: ApplicationStatus;
+  staffNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmitApplicationInput {
+  jobListingId: string;
+  jobListingTitle: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  coverLetter: string;
+  resumeObjectPath?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  availability?: string;
+}
+
+export interface UpdateApplicationInput {
+  status?: ApplicationStatus;
+  staffNotes?: string;
+}
+
+export interface ApplicationsResponse {
+  applications: JobApplication[];
+}
+
+export const submitApplication = async (
+  input: SubmitApplicationInput,
+  options?: RequestInit,
+): Promise<{ application: JobApplication }> =>
+  customFetch<{ application: JobApplication }>('/api/applications', {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(input),
+  });
+
+export const getStaffApplications = async (
+  filters?: { jobId?: string; status?: ApplicationStatus },
+  options?: RequestInit,
+): Promise<ApplicationsResponse> => {
+  const params = new URLSearchParams();
+  if (filters?.jobId) params.set('jobId', filters.jobId);
+  if (filters?.status) params.set('status', filters.status);
+  const qs = params.toString();
+  return customFetch<ApplicationsResponse>(
+    `/api/staff/applications${qs ? `?${qs}` : ''}`,
+    { ...options, method: 'GET' },
+  );
+};
+
+export const updateApplication = async (
+  id: string,
+  input: UpdateApplicationInput,
+  options?: RequestInit,
+): Promise<{ application: JobApplication }> =>
+  customFetch<{ application: JobApplication }>(`/api/staff/applications/${id}`, {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(input),
+  });
+
 // ── Staff analytics ───────────────────────────────────────────────────────────
 
 export interface StaffAnalyticsResponse {
@@ -140,27 +225,22 @@ export interface StaffAnalyticsResponse {
   dailyRows: { path: string; viewDate: string; count: number }[];
 }
 
-export const getStaffAnalyticsUrl = (days?: number) =>
-  `/api/staff/analytics${days ? `?days=${days}` : ''}`;
-
 export const getStaffAnalytics = async (
   days?: number,
   options?: RequestInit,
 ): Promise<StaffAnalyticsResponse> =>
-  customFetch<StaffAnalyticsResponse>(getStaffAnalyticsUrl(days), {
-    ...options,
-    method: 'GET',
-  });
+  customFetch<StaffAnalyticsResponse>(
+    `/api/staff/analytics${days ? `?days=${days}` : ''}`,
+    { ...options, method: 'GET' },
+  );
 
 // ── Storage ───────────────────────────────────────────────────────────────────
-
-export const getRequestUploadUrlUrl = () => `/api/storage/uploads/request-url`;
 
 export const requestUploadUrl = async (
   uploadUrlRequest: UploadUrlRequest,
   options?: RequestInit,
 ): Promise<UploadUrlResponse> =>
-  customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(), {
+  customFetch<UploadUrlResponse>('/api/storage/uploads/request-url', {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -169,19 +249,13 @@ export const requestUploadUrl = async (
 
 export type { UploadUrlRequest, UploadUrlResponse };
 
-export const getGetPublicObjectUrl = (filePath: string) =>
-  `/api/storage/public-objects/${filePath}`;
-
 export const getPublicObject = async (filePath: string, options?: RequestInit): Promise<Blob> =>
-  customFetch<Blob>(getGetPublicObjectUrl(filePath), { ...options, method: 'GET' });
-
-export const getGetStorageObjectUrl = (objectPath: string) =>
-  `/api/storage/objects/${objectPath}`;
+  customFetch<Blob>(`/api/storage/public-objects/${filePath}`, { ...options, method: 'GET' });
 
 export const getStorageObject = async (
   objectPath: string,
   options?: RequestInit,
 ): Promise<Blob> =>
-  customFetch<Blob>(getGetStorageObjectUrl(objectPath), { ...options, method: 'GET' });
+  customFetch<Blob>(`/api/storage/objects/${objectPath}`, { ...options, method: 'GET' });
 
 export type { HealthStatus, ErrorEnvelope };

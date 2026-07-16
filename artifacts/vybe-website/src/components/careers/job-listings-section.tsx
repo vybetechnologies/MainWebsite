@@ -4,8 +4,17 @@ import { useEffect, useState } from 'react';
 import { MapPin, Clock, Building2, ArrowRight } from 'lucide-react';
 import { getJobListings } from '@workspace/api-client-react';
 import type { JobListing } from '@workspace/api-client-react';
+import { ApplicationModal } from './application-modal';
 
-function JobCard({ listing }: { listing: JobListing }) {
+// ── Job card ──────────────────────────────────────────────────────────────────
+
+function JobCard({
+  listing,
+  onApply,
+}: {
+  listing: JobListing;
+  onApply: (l: JobListing) => void;
+}) {
   return (
     <div className="group rounded-2xl border border-card-border bg-card p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors">
       <div className="flex items-start justify-between gap-4">
@@ -53,21 +62,25 @@ function JobCard({ listing }: { listing: JobListing }) {
       )}
 
       <div className="pt-2 mt-auto">
-        <a
-          href="#careers-form"
+        <button
+          type="button"
+          onClick={() => onApply(listing)}
           className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:gap-3 transition-all"
         >
           Apply now
           <ArrowRight size={14} />
-        </a>
+        </button>
       </div>
     </div>
   );
 }
 
+// ── Section ───────────────────────────────────────────────────────────────────
+
 export function JobListingsSection() {
   const [listings, setListings] = useState<JobListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [applyTarget, setApplyTarget] = useState<JobListing | null>(null);
 
   useEffect(() => {
     getJobListings()
@@ -78,7 +91,7 @@ export function JobListingsSection() {
   if (isLoading) {
     return (
       <div className="grid sm:grid-cols-2 gap-4 max-w-4xl">
-        {[...Array(2)].map((_, i) => (
+        {[1, 2].map((i) => (
           <div key={i} className="h-52 rounded-2xl bg-card animate-pulse" />
         ))}
       </div>
@@ -97,10 +110,19 @@ export function JobListingsSection() {
   }
 
   return (
-    <div className="grid sm:grid-cols-2 gap-4 max-w-4xl">
-      {listings.map((listing) => (
-        <JobCard key={listing.id} listing={listing} />
-      ))}
-    </div>
+    <>
+      <div className="grid sm:grid-cols-2 gap-4 max-w-4xl">
+        {listings.map((listing) => (
+          <JobCard key={listing.id} listing={listing} onApply={setApplyTarget} />
+        ))}
+      </div>
+
+      {applyTarget && (
+        <ApplicationModal
+          listing={applyTarget}
+          onClose={() => setApplyTarget(null)}
+        />
+      )}
+    </>
   );
 }
