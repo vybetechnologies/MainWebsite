@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
-import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { Providers } from '@/components/providers';
-import { PageViewTracker } from '@/components/analytics/page-view-tracker';
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, organizationJsonLd } from '@/lib/seo';
 import './globals.css';
 
@@ -16,9 +13,7 @@ export const metadata: Metadata = {
     template: '%s | VYBE Technologies',
   },
   description: DEFAULT_DESCRIPTION,
-  alternates: {
-    canonical: '/',
-  },
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'VYBE Technologies | Technology built around real life.',
     description: DEFAULT_DESCRIPTION,
@@ -33,21 +28,13 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE],
   },
-  icons: {
-    icon: '/favicon.svg',
-  },
+  icons: { icon: '/favicon.svg' },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
-        {/* Organization structured data — describes VYBE Technologies as an
-            entity to search engines site-wide (schema.org/Organization). */}
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
@@ -62,12 +49,7 @@ export default function RootLayout({
           >
             Skip to main content
           </a>
-          <Navbar />
-          <main id="main-content" className="flex-1 flex flex-col pt-20 md:pt-0">
-            {children}
-          </main>
-          <Footer />
-          <PageViewTracker />
+          {children}
         </Providers>
       </body>
     </html>
