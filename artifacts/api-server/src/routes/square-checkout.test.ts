@@ -354,6 +354,114 @@ describe("GET /api/catalog/items", () => {
     expect(status).toBe(200);
     expect(body.items).toEqual([]);
   });
+
+  it("surfaces an empty variations array when the only variation is marked isDeleted=true", async () => {
+    squareMock.catalogObjects = [
+      {
+        type: "ITEM",
+        id: "ITEM_001",
+        isDeleted: false,
+        itemData: {
+          name: "Deleted Variation Item",
+          description: "",
+          imageIds: [],
+          variations: [
+            {
+              type: "ITEM_VARIATION",
+              id: "VAR_DELETED",
+              isDeleted: true,
+              itemVariationData: {
+                itemId: "ITEM_001",
+                name: "Gone",
+                priceMoney: { amount: BigInt(500), currency: "USD" },
+                sku: null,
+              },
+            },
+          ],
+        },
+      },
+    ] as unknown[];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    const item = body.items[0];
+    expect(item).toBeDefined();
+    expect(item.variations).toEqual([]);
+  });
+
+  it("yields priceCents=0 for a variation with no priceMoney rather than crashing", async () => {
+    squareMock.catalogObjects = [
+      {
+        type: "ITEM",
+        id: "ITEM_001",
+        isDeleted: false,
+        itemData: {
+          name: "Free Item",
+          description: "",
+          imageIds: [],
+          variations: [
+            {
+              type: "ITEM_VARIATION",
+              id: "VAR_NO_PRICE",
+              isDeleted: false,
+              itemVariationData: {
+                itemId: "ITEM_001",
+                name: "No Price",
+                // priceMoney intentionally absent
+                sku: null,
+              },
+            },
+          ],
+        },
+      },
+    ] as unknown[];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    const variation = body.items[0]?.variations[0];
+    expect(variation).toBeDefined();
+    expect(variation.priceCents).toBe(0);
+    expect(typeof variation.priceCents).toBe("number");
+  });
+
+  it("sets categoryName=null when the item's categoryId is not in the fetched catalog objects", async () => {
+    squareMock.catalogObjects = [
+      {
+        type: "ITEM",
+        id: "ITEM_001",
+        isDeleted: false,
+        itemData: {
+          name: "Orphan Category Item",
+          description: "",
+          imageIds: [],
+          categoryId: "CATEGORY_MISSING",
+          variations: [
+            {
+              type: "ITEM_VARIATION",
+              id: "VAR_001",
+              isDeleted: false,
+              itemVariationData: {
+                itemId: "ITEM_001",
+                name: "Regular",
+                priceMoney: { amount: BigInt(999), currency: "USD" },
+                sku: null,
+              },
+            },
+          ],
+        },
+      },
+      // No CATEGORY object with id CATEGORY_MISSING is present
+    ] as unknown[];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    const item = body.items[0];
+    expect(item).toBeDefined();
+    expect(item.categoryName).toBeNull();
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
