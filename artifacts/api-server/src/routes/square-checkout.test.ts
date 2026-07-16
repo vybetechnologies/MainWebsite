@@ -95,6 +95,13 @@ const mockClient = {
   },
 };
 
+// ── Staff auth mock ───────────────────────────────────────────────────────────
+// Bypass Clerk-based auth so catalog staff routes are reachable in tests.
+
+vi.mock("../lib/staff-auth", () => ({
+  requireStaffAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
 vi.mock("../lib/square-client", () => ({
   isSquareAvailable: vi.fn(() => squareMock.available),
   SQUARE_LOCATION_ID: "TEST_LOCATION",
@@ -195,9 +202,36 @@ afterAll(async () => {
   );
 });
 
+const DEFAULT_CATALOG_OBJECTS = [
+  {
+    type: "ITEM",
+    id: "ITEM_001",
+    isDeleted: false,
+    itemData: {
+      name: "Test Product",
+      description: "A test item",
+      imageIds: [],
+      variations: [
+        {
+          type: "ITEM_VARIATION",
+          id: "VAR_001",
+          isDeleted: false,
+          itemVariationData: {
+            itemId: "ITEM_001",
+            name: "Regular",
+            priceMoney: { amount: BigInt(1999), currency: "USD" },
+            sku: "TEST-SKU",
+          },
+        },
+      ],
+    },
+  },
+] as unknown[];
+
 beforeEach(() => {
   // Reset control flags and data to defaults before each test.
   squareMock.available = true;
+  squareMock.catalogObjects = [...DEFAULT_CATALOG_OBJECTS];
   squareMock.batchGetResult = {
     objects: [
       {
@@ -249,6 +283,15 @@ async function post(path: string, body: unknown) {
 
 async function get(path: string) {
   const res = await fetch(`${baseUrl}${path}`);
+  return { status: res.status, body: await res.json() };
+}
+
+async function patch(path: string, body: unknown) {
+  const res = await fetch(`${baseUrl}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
   return { status: res.status, body: await res.json() };
 }
 
@@ -504,5 +547,194 @@ describe("POST /api/payments/create-order-and-pay", () => {
 
     expect(status).toBe(200);
     expect(typeof body.totalMoney).toBe("number");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Visibility gate — GET /api/catalog/items
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("GET /api/catalog/items — visibility gate", () => {
+  it("returns only items whose squareItemId is in the DB visible set", async () => {
+    // Two Square items, but only ITEM_001 is marked visible in the DB.
+    squareMock.catalogObjects = [
+      {
+        type: "ITEM",
+        id: "ITEM_001",
+        isDeleted: false,
+        itemData: { name: "Visible Item", description: "", imageIds: [], variations: [] },
+      },
+      {
+        type: "ITEM",
+        id: "ITEM_002",
+        isDeleted: false,
+        itemData: { name: "Hidden Item", description: "", imageIds: [], variations: [] },
+      },
+    ] as unknown[];
+    dbMock.visibleRows = [{ squareItemId: "ITEM_001", visible: true, displayOrder: 0 }];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    expect(body.items).toHaveLength(1);
+    expect(body.items[0].id).toBe("ITEM_001");
+    const returnedIds = body.items.map((i: { id: string }) => i.id);
+    expect(returnedIds).not.toContain("ITEM_002");
+  });
+
+  it("excludes all items when the DB visible set is empty (visibility flags cleared)", async () => {
+    // Simulate a schema migration or regression that clears all visible flags.
+    dbMock.visibleRows = [];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    expect(body.items).toEqual([]);
+  });
+
+  it("includes every item that is marked visible, up to the full catalog size", async () => {
+    squareMock.catalogObjects = [
+      {
+        type: "ITEM",
+        id: "ITEM_A",
+        isDeleted: false,
+        itemData: { name: "Item A", description: "", imageIds: [], variations: [] },
+      },
+      {
+        type: "ITEM",
+        id: "ITEM_B",
+        isDeleted: false,
+        itemData: { name: "Item B", description: "", imageIds: [], variations: [] },
+      },
+    ] as unknown[];
+    dbMock.visibleRows = [
+      { squareItemId: "ITEM_A", visible: true, displayOrder: 1 },
+      { squareItemId: "ITEM_B", visible: true, displayOrder: 0 },
+    ];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    expect(body.items).toHaveLength(2);
+    const returnedIds = body.items.map((i: { id: string }) => i.id);
+    expect(returnedIds).toContain("ITEM_A");
+    expect(returnedIds).toContain("ITEM_B");
+  });
+
+  it("respects displayOrder from the DB when sorting visible items", async () => {
+    squareMock.catalogObjects = [
+      {
+        type: "ITEM",
+        id: "ITEM_FIRST",
+        isDeleted: false,
+        itemData: { name: "Should Be Second", description: "", imageIds: [], variations: [] },
+      },
+      {
+        type: "ITEM",
+        id: "ITEM_SECOND",
+        isDeleted: false,
+        itemData: { name: "Should Be First", description: "", imageIds: [], variations: [] },
+      },
+    ] as unknown[];
+    // ITEM_SECOND has lower displayOrder, so it should appear first.
+    dbMock.visibleRows = [
+      { squareItemId: "ITEM_SECOND", visible: true, displayOrder: 0 },
+      { squareItemId: "ITEM_FIRST", visible: true, displayOrder: 1 },
+    ];
+
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    expect(body.items[0].id).toBe("ITEM_SECOND");
+    expect(body.items[1].id).toBe("ITEM_FIRST");
+  });
+
+  it("never exposes the isDeleted field to callers", async () => {
+    const { status, body } = await get("/api/catalog/items");
+
+    expect(status).toBe(200);
+    for (const item of body.items) {
+      expect(item).not.toHaveProperty("isDeleted");
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /api/staff/catalog/:id — visibility upsert
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("PATCH /api/staff/catalog/:id", () => {
+  it("returns 200 with { ok: true } when visible=true is set", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { visible: true });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({ ok: true });
+  });
+
+  it("returns 200 with { ok: true } when visible=false is set", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { visible: false });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({ ok: true });
+  });
+
+  it("returns 200 when only displayOrder is provided", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { displayOrder: 3 });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({ ok: true });
+  });
+
+  it("returns 200 when both visible and displayOrder are provided", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", {
+      visible: true,
+      displayOrder: 5,
+    });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({ ok: true });
+  });
+
+  it("returns 400 when visible is not a boolean", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { visible: "yes" });
+
+    expect(status).toBe(400);
+    expect(body).toHaveProperty("error");
+  });
+
+  it("returns 400 when displayOrder is negative", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { displayOrder: -1 });
+
+    expect(status).toBe(400);
+    expect(body).toHaveProperty("error");
+  });
+
+  it("returns 400 when displayOrder is not an integer", async () => {
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { displayOrder: 1.5 });
+
+    expect(status).toBe(400);
+    expect(body).toHaveProperty("error");
+  });
+
+  it("calls db.insert (upsert) with the squareItemId from the URL param", async () => {
+    const { db } = await import("@workspace/db");
+
+    await patch("/api/staff/catalog/SQUARE_ITEM_XYZ", { visible: true });
+
+    expect(db.insert).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 500 when the database throws", async () => {
+    const { db } = await import("@workspace/db");
+    (db.insert as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
+      values: vi.fn(() => ({
+        onConflictDoUpdate: vi.fn(() => Promise.reject(new Error("DB connection lost"))),
+      })),
+    }));
+
+    const { status, body } = await patch("/api/staff/catalog/ITEM_001", { visible: true });
+
+    expect(status).toBe(500);
+    expect(body).toHaveProperty("error");
   });
 });
