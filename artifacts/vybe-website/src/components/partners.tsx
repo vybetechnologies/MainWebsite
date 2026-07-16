@@ -9,6 +9,7 @@ const PARTNERS = [
   { name: "Pax8", logo: "/partners/pax8.png" },
   { name: "MobileSentrix", logo: "/partners/mobilesentrix.png" },
   { name: "Grasshopper", logo: "/partners/grasshopper.png" },
+  { name: "Square", logo: "/partners/square.svg" },
 ];
 
 export function Partners() {

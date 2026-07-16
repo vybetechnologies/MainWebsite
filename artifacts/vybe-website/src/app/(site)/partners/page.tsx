@@ -98,6 +98,14 @@ const PARTNERS: Partner[] = [
       'Mobilesentrix is a premier wholesale distributor of mobile device replacement parts. Our partnership ensures our repair inventory is stocked with high-quality components at competitive prices.',
     website: 'https://mobilesentrix.com',
   },
+  {
+    name: 'Square',
+    logo: '/partners/square.svg',
+    category: 'Payments',
+    description:
+      'VYBE Technologies uses Square to power secure, seamless payments across the platform — from Tech Rescue repair deposits and staff-generated invoices to full catalog checkout in the VYBE Marketplace. Square handles card processing, order tracking, and receipts so customers can pay with confidence.',
+    website: 'https://squareup.com',
+  },
 ];
 
 const CATEGORIES = [...new Set(PARTNERS.map((p) => p.category))];
