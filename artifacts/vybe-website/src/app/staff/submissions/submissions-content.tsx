@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState, useMemo } from 'react';
+import { Fragment, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import {
   ChevronDown,
   ChevronUp,
@@ -17,6 +17,7 @@ import { listBookingRequests } from '@workspace/api-client-react';
 import type { BookingRequestRecord } from '@workspace/api-client-react';
 import { StaffAuthGate, StaffPageHeader, ServiceBadge } from '../staff-shell';
 import { resolveApiBaseUrl } from '@/lib/api-base';
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -42,11 +43,16 @@ function formatDateTime(iso: string): string {
   });
 }
 
-const POLL_INTERVAL_MS = 30_000;
-
 /** Returns the newest createdAt ISO string among a list, or '' if empty. */
 function newestAt(items: BookingRequestRecord[]): string {
   return items.reduce((acc, r) => (r.createdAt > acc ? r.createdAt : acc), '');
+}
+
+/** Build the full URL for the booking-requests SSE stream. */
+function sseStreamUrl(): string {
+  if (typeof window === 'undefined') return '/api/booking-requests/stream';
+  const base = resolveApiBaseUrl(window.location.hostname) ?? '';
+  return `${base}/api/booking-requests/stream`;
 }
 
 // ── Detail row ────────────────────────────────────────────────────────────────
@@ -143,8 +149,8 @@ function SubmissionsTable() {
       });
   };
 
-  // Silent background poll — does not touch isLoading so the table stays visible.
-  const poll = () => {
+  // Silent background check on SSE notification — does not touch isLoading.
+  const checkForNew = useCallback(() => {
     listBookingRequests()
       .then((r) => {
         const latest = newestAt(r.requests);
@@ -154,16 +160,27 @@ function SubmissionsTable() {
         }
       })
       .catch(() => {
-        // Silently ignore poll errors — don't disturb the UI.
+        // Silently ignore errors — don't disturb the UI.
       });
-  };
+  }, []);
 
   useEffect(() => {
     load();
-    const id = setInterval(poll, POLL_INTERVAL_MS);
-    return () => clearInterval(id);
+
+    const url = sseStreamUrl();
+    const es = new EventSource(url, { withCredentials: true });
+
+    es.addEventListener('new-booking', () => {
+      checkForNew();
+    });
+
+    es.onerror = () => {
+      // EventSource will auto-reconnect; nothing extra needed here.
+    };
+
+    return () => es.close();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkForNew]);
 
   const filtered = useMemo(
     () => requests.filter((r) => matchesFilter(r, filter)),

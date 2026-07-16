@@ -4,6 +4,7 @@ import { CreateBookingRequestBody } from "@workspace/api-zod";
 import { db, bookingRequestsTable } from "@workspace/db";
 import { sendEmailViaResend } from "../lib/resend";
 import { requireStaffAuth } from "../lib/staff-auth";
+import { addSseClient, removeSseClient, notifyNewBooking } from "../lib/booking-sse";
 
 const router: IRouter = Router();
 
@@ -78,6 +79,8 @@ router.post("/booking-requests", async (req, res): Promise<void> => {
       preferredDate,
       photoObjectPath,
     });
+    // Notify any connected staff browsers immediately.
+    notifyNewBooking();
   } catch (err) {
     // Don't block the submission on a DB hiccup — the email notification is
     // the primary channel; persistence just backs it up for the staff dashboard.
@@ -99,6 +102,45 @@ router.post("/booking-requests", async (req, res): Promise<void> => {
   }
 
   res.status(201).json({ success: true });
+});
+
+/**
+ * SSE stream — staff browsers connect here to receive instant push
+ * notifications when a new booking request is created.
+ *
+ * EventSource (used by browsers) automatically sends cookies, so the
+ * Clerk session cookie is forwarded and requireStaffAuth works normally.
+ * No sensitive booking data is transmitted over the stream; clients
+ * react to the event by calling the authenticated REST endpoint.
+ */
+router.get("/booking-requests/stream", requireStaffAuth, (req, res): void => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  // Disable response buffering so chunks are flushed immediately.
+  res.flushHeaders();
+
+  addSseClient(res);
+
+  // Send an initial heartbeat so the browser knows the connection is live.
+  res.write(": connected\n\n");
+
+  // Keep the connection alive with a periodic heartbeat comment (no event fired).
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(": heartbeat\n\n");
+    } catch {
+      clearInterval(heartbeat);
+    }
+  }, 25_000);
+
+  const cleanup = () => {
+    clearInterval(heartbeat);
+    removeSseClient(res);
+  };
+
+  req.on("close", cleanup);
+  req.on("error", cleanup);
 });
 
 router.get("/booking-requests", requireStaffAuth, async (req, res): Promise<void> => {
