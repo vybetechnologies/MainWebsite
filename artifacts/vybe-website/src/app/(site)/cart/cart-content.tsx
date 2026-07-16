@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
-import { ShoppingCart, Trash2, Minus, Plus, ArrowRight, Package } from 'lucide-react';
+import { useAuth } from '@clerk/react';
+import { ShoppingCart, Trash2, Minus, Plus, ArrowRight, Package, CreditCard, X } from 'lucide-react';
 import Link from 'next/link';
+import { SquarePaymentForm, PaymentReceipt } from '@/components/square-payment-form';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -29,8 +32,13 @@ function EmptyState() {
           href="/products"
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
         >
-          Browse products
-          <ArrowRight size={14} />
+          Browse products <ArrowRight size={14} />
+        </Link>
+        <Link
+          href="/catalog"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 text-sm font-medium hover:bg-white/5 transition-colors"
+        >
+          Shop catalog
         </Link>
         <Link
           href="/tech-rescue"
@@ -57,17 +65,14 @@ function CartItemRow({
   const typeColors: Record<string, string> = {
     product: 'bg-blue-500/15 text-blue-400',
     service: 'bg-purple-500/15 text-purple-400',
-    repair:  'bg-amber-500/15 text-amber-400',
+    repair: 'bg-amber-500/15 text-amber-400',
   };
 
   return (
     <div className="flex items-start gap-4 py-5 border-b border-white/8 last:border-0">
-      {/* Icon */}
       <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center shrink-0 border border-white/10">
         <Package size={20} className="text-muted-foreground" />
       </div>
-
-      {/* Info */}
       <div className="flex-1 min-w-0 space-y-1">
         <p className="font-medium text-sm">{item.name}</p>
         {item.description && (
@@ -77,8 +82,6 @@ function CartItemRow({
           {item.type}
         </span>
       </div>
-
-      {/* Qty controls */}
       <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
@@ -97,15 +100,11 @@ function CartItemRow({
           <Plus size={12} />
         </button>
       </div>
-
-      {/* Price */}
       {item.price != null && (
         <p className="text-sm font-semibold tabular-nums shrink-0">
           {formatPrice(item.price * item.qty)}
         </p>
       )}
-
-      {/* Remove */}
       <button
         type="button"
         onClick={() => onRemove(item.id)}
@@ -118,65 +117,157 @@ function CartItemRow({
   );
 }
 
+// ── Checkout modal ────────────────────────────────────────────────────────────
+
+function CheckoutModal({
+  totalCents,
+  buyerEmail,
+  items,
+  onSuccess,
+  onClose,
+}: {
+  totalCents: number;
+  buyerEmail?: string;
+  items: ReturnType<typeof useCart>['items'];
+  onSuccess: (receiptUrl: string | null) => void;
+  onClose: () => void;
+}) {
+  const note = items.map((i) => `${i.name}${i.qty > 1 ? ` x${i.qty}` : ''}`).join(', ');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-md">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X size={20} />
+        </button>
+        <SquarePaymentForm
+          amountCents={totalCents}
+          label={`Pay ${formatPrice(totalCents)}`}
+          note={`VYBE order: ${note}`}
+          buyerEmail={buyerEmail}
+          onSuccess={onSuccess}
+          onCancel={onClose}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function CartContent() {
   const { items, removeFromCart, updateQty, clearCart } = useCart();
+  const { user } = (() => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { useUser } = require('@clerk/react') as typeof import('@clerk/react');
+      return useUser();
+    } catch {
+      return { user: null };
+    }
+  })();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [receiptUrl, setReceiptUrl] = useState<string | null | undefined>(undefined);
 
   const totalCents = items.reduce((sum, i) => sum + (i.price ?? 0) * i.qty, 0);
   const hasPrices = items.some((i) => i.price != null);
+  const buyerEmail = user?.primaryEmailAddress?.emailAddress;
 
   if (items.length === 0) return <EmptyState />;
 
+  // Payment completed — show receipt
+  if (receiptUrl !== undefined) {
+    return (
+      <div className="container mx-auto max-w-3xl px-6 py-16">
+        <PaymentReceipt
+          receiptUrl={receiptUrl}
+          onDone={() => { clearCart(); setReceiptUrl(undefined); }}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto max-w-3xl px-6 py-16">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-3xl font-bold">Your Cart</h1>
-        <button
-          type="button"
-          onClick={clearCart}
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Clear all
-        </button>
-      </div>
+    <>
+      {checkoutOpen && hasPrices && totalCents > 0 && (
+        <CheckoutModal
+          totalCents={totalCents}
+          buyerEmail={buyerEmail}
+          items={items}
+          onSuccess={(url) => { setReceiptUrl(url); setCheckoutOpen(false); clearCart(); }}
+          onClose={() => setCheckoutOpen(false)}
+        />
+      )}
 
-      {/* Items */}
-      <div className="rounded-2xl border border-white/10 bg-card px-6">
-        {items.map((item) => (
-          <CartItemRow
-            key={item.id}
-            item={item}
-            onRemove={removeFromCart}
-            onQtyChange={updateQty}
-          />
-        ))}
-      </div>
-
-      {/* Summary */}
-      <div className="mt-6 rounded-2xl border border-white/10 bg-card p-6 space-y-4">
-        {hasPrices && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Estimated total</span>
-            <span className="font-semibold tabular-nums">{formatPrice(totalCents)}</span>
-          </div>
-        )}
-
-        <div className="pt-2 border-t border-white/10 space-y-2">
-          {/* CTA — no real checkout yet */}
-          <Link
-            href="/contact"
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+      <div className="container mx-auto max-w-3xl px-6 py-16">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="font-display text-3xl font-bold">Your Cart</h1>
+          <button
+            type="button"
+            onClick={clearCart}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Request a quote
-            <ArrowRight size={15} />
-          </Link>
-          <p className="text-center text-xs text-muted-foreground">
-            Our team will follow up within one business day to confirm your order.
-          </p>
+            Clear all
+          </button>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-card px-6">
+          {items.map((item) => (
+            <CartItemRow
+              key={item.id}
+              item={item}
+              onRemove={removeFromCart}
+              onQtyChange={updateQty}
+            />
+          ))}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-white/10 bg-card p-6 space-y-4">
+          {hasPrices && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total</span>
+              <span className="font-bold text-lg tabular-nums">{formatPrice(totalCents)}</span>
+            </div>
+          )}
+
+          <div className="pt-2 border-t border-white/10 space-y-3">
+            {hasPrices && totalCents > 0 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setCheckoutOpen(true)}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
+                >
+                  <CreditCard size={15} />
+                  Pay {formatPrice(totalCents)} with Square
+                </button>
+                <Link
+                  href="/contact"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-white/15 text-sm font-medium hover:bg-white/5 transition-colors text-muted-foreground"
+                >
+                  Request a quote instead
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/contact"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+                >
+                  Request a quote <ArrowRight size={15} />
+                </Link>
+                <p className="text-center text-xs text-muted-foreground">
+                  Our team will follow up within one business day.
+                </p>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Paperclip, X, CheckCircle2 } from 'lucide-react';
+import { Paperclip, X, CheckCircle2, CreditCard, ArrowRight } from 'lucide-react';
+import { SquarePaymentForm, PaymentReceipt } from '@/components/square-payment-form';
 
 const DEVICE_TYPES = [
   'Computer',
@@ -31,7 +32,10 @@ const SERVICE_TYPES = ['On-Site Support', 'Drop-Off Repair', 'Remote Support'];
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
-type Status = 'idle' | 'submitting' | 'success' | 'error';
+/** $50.00 deposit — adjust as needed */
+const DEPOSIT_CENTS = 5000;
+
+type Status = 'idle' | 'submitting' | 'success' | 'paying-deposit' | 'deposit-done' | 'error';
 
 export function BookingForm() {
   const [status, setStatus] = useState<Status>('idle');
@@ -41,23 +45,77 @@ export function BookingForm() {
   const [preferredServiceType, setPreferredServiceType] = useState('');
   const [consent, setConsent] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [submittedEmail, setSubmittedEmail] = useState('');
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
 
   const { uploadFile, isUploading, error: uploadError } = useUpload();
 
+  const apiBase =
+    typeof window !== 'undefined' ? (resolveApiBaseUrl(window.location.hostname) ?? '') : '';
+
+  // ── Success state — offer optional deposit ──────────────────────────────────
+
+  if (status === 'paying-deposit') {
+    return (
+      <SquarePaymentForm
+        amountCents={DEPOSIT_CENTS}
+        label="Pay $50.00 deposit"
+        note="Tech Rescue deposit"
+        buyerEmail={submittedEmail}
+        onSuccess={(url) => {
+          setReceiptUrl(url);
+          setStatus('deposit-done');
+        }}
+        onCancel={() => setStatus('success')}
+      />
+    );
+  }
+
+  if (status === 'deposit-done') {
+    return (
+      <PaymentReceipt
+        receiptUrl={receiptUrl}
+        onDone={() => {
+          setStatus('idle');
+          setReceiptUrl(null);
+        }}
+      />
+    );
+  }
+
   if (status === 'success') {
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-10 text-center flex flex-col items-center gap-4">
+      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-10 flex flex-col items-center gap-5 text-center">
         <CheckCircle2 className="h-8 w-8 text-emerald-400" />
-        <p className="text-emerald-400 font-medium text-lg">
-          Thanks — your Tech Rescue request is in.
-        </p>
-        <p className="text-sm text-muted-foreground max-w-md">
-          We'll review the details and reach out within one business day to confirm a time. Need
-          it faster? Call us directly at 888-231-VYBE.
-        </p>
-        <Button variant="outline" onClick={() => setStatus('idle')}>
-          Submit another request
-        </Button>
+        <div>
+          <p className="text-emerald-400 font-medium text-lg">
+            Thanks — your Tech Rescue request is in.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-md">
+            We'll review the details and reach out within one business day to confirm a time. Need
+            it faster? Call us at 888-231-VYBE.
+          </p>
+        </div>
+
+        {/* Optional deposit CTA */}
+        <div className="w-full max-w-sm pt-2 border-t border-white/10 space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Want to secure your slot now? Pay a refundable $50 deposit and we'll prioritise your
+            booking.
+          </p>
+          <Button
+            variant="default"
+            className="w-full gap-2"
+            onClick={() => setStatus('paying-deposit')}
+          >
+            <CreditCard size={15} />
+            Pay $50 deposit with Square
+          </Button>
+          <Button variant="outline" className="w-full gap-1" onClick={() => setStatus('idle')}>
+            Skip — submit another request
+            <ArrowRight size={13} />
+          </Button>
+        </div>
       </div>
     );
   }
@@ -84,7 +142,7 @@ export function BookingForm() {
       errors.email = 'Enter a valid email address.';
     }
     if (!deviceType) errors.deviceType = 'Select a device type.';
-    if (!message) errors.message = 'Tell us what\'s going on.';
+    if (!message) errors.message = "Tell us what's going on.";
     if (!consent) errors.consent = 'Please confirm before submitting.';
 
     if (Object.keys(errors).length > 0) {
@@ -101,7 +159,8 @@ export function BookingForm() {
         if (!uploadResult) {
           setStatus('error');
           setErrorMessage(
-            uploadError?.message ?? 'We could not upload your photo. Try again without it, or contact us directly.',
+            uploadError?.message ??
+              'We could not upload your photo. Try again without it, or contact us directly.',
           );
           return;
         }
@@ -123,6 +182,7 @@ export function BookingForm() {
         ...(photoObjectPath ? { photoObjectPath } : {}),
       });
 
+      setSubmittedEmail(email);
       setStatus('success');
       form.reset();
       setDeviceType('');
@@ -132,7 +192,7 @@ export function BookingForm() {
     } catch {
       setStatus('error');
       setErrorMessage(
-        "Something went wrong sending your request. Please try again or call us directly at 888-231-VYBE.",
+        'Something went wrong sending your request. Please try again or call us directly at 888-231-VYBE.',
       );
     }
   };
@@ -178,9 +238,9 @@ export function BookingForm() {
               <SelectValue placeholder="Select a device type" />
             </SelectTrigger>
             <SelectContent>
-              {DEVICE_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
+              {DEVICE_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -190,19 +250,19 @@ export function BookingForm() {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="brandModel">Brand & Model</Label>
-          <Input id="brandModel" name="brandModel" placeholder="e.g. Dell XPS 13" />
+          <Label htmlFor="brandModel">Brand / Model</Label>
+          <Input id="brandModel" name="brandModel" placeholder="e.g. Dell XPS 15" />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="message">What's going on?</Label>
+        <Label htmlFor="message">Describe the issue</Label>
         <Textarea
           id="message"
           name="message"
-          rows={4}
           required
-          placeholder="Describe the problem — error messages, when it started, anything that helps us prep."
+          rows={4}
+          placeholder="Tell us what's going wrong — error messages, symptoms, how long it's been happening…"
         />
         {fieldErrors.message && <p className="text-xs text-destructive">{fieldErrors.message}</p>}
       </div>
@@ -212,12 +272,12 @@ export function BookingForm() {
           <Label htmlFor="preferredServiceType">Preferred Service Type</Label>
           <Select value={preferredServiceType} onValueChange={setPreferredServiceType}>
             <SelectTrigger id="preferredServiceType">
-              <SelectValue placeholder="How should we help?" />
+              <SelectValue placeholder="Select (optional)" />
             </SelectTrigger>
             <SelectContent>
-              {SERVICE_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
+              {SERVICE_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -229,29 +289,26 @@ export function BookingForm() {
         </div>
       </div>
 
+      {/* Photo upload */}
       <div className="flex flex-col gap-2">
-        <Label htmlFor="photo">Photo (optional)</Label>
+        <Label>Attach a photo (optional, max 10 MB)</Label>
         {photoFile ? (
-          <div className="flex items-center justify-between rounded-md border border-input px-3 py-2 text-sm">
-            <span className="truncate">{photoFile.name}</span>
+          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-card px-4 py-3">
+            <Paperclip size={14} className="text-muted-foreground shrink-0" />
+            <span className="text-sm truncate flex-1">{photoFile.name}</span>
             <button
               type="button"
               onClick={() => setPhotoFile(null)}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Remove photo"
+              className="text-muted-foreground hover:text-destructive transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X size={14} />
             </button>
           </div>
         ) : (
-          <label
-            htmlFor="photo"
-            className="flex items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-foreground transition-colors"
-          >
-            <Paperclip className="h-4 w-4" />
-            Attach a photo of the issue
+          <label className="flex items-center gap-3 rounded-lg border border-dashed border-white/15 px-4 py-3 cursor-pointer hover:border-primary/40 transition-colors">
+            <Paperclip size={14} className="text-muted-foreground shrink-0" />
+            <span className="text-sm text-muted-foreground">Click to attach a photo</span>
             <input
-              id="photo"
               type="file"
               accept="image/*"
               className="hidden"
@@ -259,46 +316,43 @@ export function BookingForm() {
                 const file = e.target.files?.[0];
                 if (!file) return;
                 if (file.size > MAX_PHOTO_BYTES) {
-                  setErrorMessage('Photo must be smaller than 10MB.');
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    photo: 'Photo must be under 10 MB.',
+                  }));
                   return;
                 }
-                setErrorMessage(null);
+                setFieldErrors((prev) => ({ ...prev, photo: '' }));
                 setPhotoFile(file);
               }}
             />
           </label>
         )}
+        {fieldErrors.photo && <p className="text-xs text-destructive">{fieldErrors.photo}</p>}
       </div>
 
+      {/* Consent */}
       <div className="flex items-start gap-3">
         <Checkbox
           id="consent"
           checked={consent}
-          onCheckedChange={(checked) => setConsent(checked === true)}
-          className="mt-0.5"
+          onCheckedChange={(v) => setConsent(Boolean(v))}
         />
-        <div>
-          <Label htmlFor="consent" className="font-normal leading-snug">
-            I consent to be contacted about this repair request by phone, text, or email.
-          </Label>
-          <p className="text-xs text-muted-foreground mt-1">
-            We only use your information to schedule and complete your service. We never sell your
-            data. See our{' '}
-            <a href="/privacy" className="underline hover:text-foreground">
-              privacy policy
-            </a>{' '}
-            for details.
-          </p>
-        </div>
+        <label htmlFor="consent" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
+          I understand that submitting this form is not a confirmed appointment. VYBE Technologies
+          will contact me to schedule and confirm service.
+        </label>
       </div>
       {fieldErrors.consent && <p className="text-xs text-destructive">{fieldErrors.consent}</p>}
 
       {status === 'error' && errorMessage && (
-        <p className="text-sm text-destructive">{errorMessage}</p>
+        <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3">
+          {errorMessage}
+        </p>
       )}
 
-      <Button type="submit" size="lg" disabled={submitting} className="w-full">
-        {submitting ? 'Sending…' : 'Start a Repair'}
+      <Button type="submit" disabled={submitting} className="w-full py-6 text-base font-semibold">
+        {submitting ? 'Sending…' : 'Submit Tech Rescue Request'}
       </Button>
     </form>
   );
