@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { Fragment, useEffect, useRef, useState, useMemo } from 'react';
 import {
   ChevronDown,
   ChevronUp,
@@ -11,10 +11,12 @@ import {
   Wrench,
   Monitor,
   Image as ImageIcon,
+  ExternalLink,
 } from 'lucide-react';
 import { listBookingRequests } from '@workspace/api-client-react';
 import type { BookingRequestRecord } from '@workspace/api-client-react';
 import { StaffAuthGate, StaffPageHeader, ServiceBadge } from '../staff-shell';
+import { resolveApiBaseUrl } from '@/lib/api-base';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -49,6 +51,12 @@ function newestAt(items: BookingRequestRecord[]): string {
 
 // ── Detail row ────────────────────────────────────────────────────────────────
 
+function getPhotoUrl(photoObjectPath: string): string {
+  if (typeof window === 'undefined') return '#';
+  const base = resolveApiBaseUrl(window.location.hostname) ?? '';
+  return `${base}/api/storage/objects/${photoObjectPath}`;
+}
+
 function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
     <div className="flex gap-2.5">
@@ -77,7 +85,20 @@ function ExpandedDetail({ r }: { r: BookingRequestRecord }) {
             <DetailRow icon={Calendar} label="Preferred date" value={r.preferredDate} />
           )}
           {r.photoObjectPath && (
-            <DetailRow icon={ImageIcon} label="Photo attached" value={r.photoObjectPath} />
+            <div className="flex gap-2.5">
+              <ImageIcon size={14} className="text-muted-foreground shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs text-muted-foreground">Photo attached</p>
+                <a
+                  href={getPhotoUrl(r.photoObjectPath)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                >
+                  View photo <ExternalLink size={11} />
+                </a>
+              </div>
+            </div>
           )}
           <div className="sm:col-span-2 lg:col-span-3">
             <p className="text-xs text-muted-foreground mb-1">Message</p>
@@ -236,9 +257,8 @@ function SubmissionsTable() {
                 {filtered.map((r) => {
                   const expanded = expandedId === r.id;
                   return (
-                    <>
+                    <Fragment key={r.id}>
                       <tr
-                        key={r.id}
                         onClick={() => toggleExpand(r.id)}
                         className="cursor-pointer hover:bg-card/40 transition-colors align-top"
                       >
@@ -270,8 +290,8 @@ function SubmissionsTable() {
                           {r.message}
                         </td>
                       </tr>
-                      {expanded && <ExpandedDetail key={`${r.id}-detail`} r={r} />}
-                    </>
+                      {expanded && <ExpandedDetail r={r} />}
+                    </Fragment>
                   );
                 })}
               </tbody>
