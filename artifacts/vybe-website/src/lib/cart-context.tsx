@@ -11,6 +11,8 @@ export interface CartItem {
   price?: number;
   qty: number;
   type: 'product' | 'service' | 'repair';
+  /** Square catalog variation ID — present when the item comes from the marketplace. */
+  squareCatalogVariationId?: string;
 }
 
 interface CartContextValue {

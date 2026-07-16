@@ -3,12 +3,14 @@
 /**
  * SquarePaymentForm — reusable embedded card form powered by Square Web Payments SDK.
  *
- * Usage:
+ * Simple payment (deposit, ad-hoc):
+ *   <SquarePaymentForm amountCents={5000} label="Pay $50 deposit" ... />
+ *
+ * Marketplace order checkout (creates a Square Order then charges it):
  *   <SquarePaymentForm
- *     apiBase={resolveApiBaseUrl(window.location.hostname) ?? ''}
- *     amountCents={5000}          // $50.00
- *     label="Pay $50.00 deposit"
- *     note="Tech Rescue deposit"
+ *     amountCents={totalCents}
+ *     lineItems={[{ catalogVariationId, name, quantity, basePriceCents }]}
+ *     label="Pay $XX.XX"
  *     buyerEmail="customer@example.com"
  *     onSuccess={(receiptUrl) => ...}
  *     onCancel={() => ...}
@@ -20,11 +22,20 @@ import { CreditCard, Loader2, Lock, CheckCircle2 } from 'lucide-react';
 import { initSquarePayments, type SquareCard } from '@/lib/square-payments';
 import { resolveApiBaseUrl } from '@/lib/api-base';
 
+export interface OrderLineItem {
+  catalogVariationId: string;
+  name: string;
+  quantity: number;
+  basePriceCents: number;
+}
+
 interface Props {
   amountCents: number;
   label: string;
   note?: string;
   buyerEmail?: string;
+  /** When provided, creates a Square Order before charging (marketplace checkout). */
+  lineItems?: OrderLineItem[];
   onSuccess: (receiptUrl: string | null) => void;
   onCancel: () => void;
 }
@@ -35,7 +46,7 @@ function formatUSD(cents: number) {
   );
 }
 
-export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSuccess, onCancel }: Props) {
+export function SquarePaymentForm({ amountCents, label, note, buyerEmail, lineItems, onSuccess, onCancel }: Props) {
   const cardContainerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<SquareCard | null>(null);
   const [phase, setPhase] = useState<'loading' | 'ready' | 'paying' | 'error'>('loading');
@@ -45,7 +56,6 @@ export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSucc
     ? (resolveApiBaseUrl(window.location.hostname) ?? '')
     : '';
 
-  // Initialize Square card form on mount
   useEffect(() => {
     let destroyed = false;
 
@@ -67,13 +77,12 @@ export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSucc
         });
 
         if (destroyed) { await card.destroy(); return; }
-
         await card.attach('#square-card-container');
         if (destroyed) { await card.destroy(); return; }
 
         cardRef.current = card;
         setPhase('ready');
-      } catch (err) {
+      } catch {
         if (!destroyed) {
           setErrorMsg('Could not load the payment form. Please refresh and try again.');
           setPhase('error');
@@ -96,21 +105,34 @@ export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSucc
     try {
       const result = await cardRef.current.tokenize();
       if (result.status !== 'OK' || !result.token) {
-        const msg = result.errors?.[0]?.message ?? 'Card tokenization failed.';
-        setErrorMsg(msg);
+        setErrorMsg(result.errors?.[0]?.message ?? 'Card tokenization failed.');
         setPhase('ready');
         return;
       }
 
-      const res = await fetch(`${apiBase}/api/payments/create-payment`, {
+      // Choose endpoint: order-and-pay for marketplace carts, simple payment for deposits
+      const useOrderEndpoint = lineItems && lineItems.length > 0;
+      const endpoint = useOrderEndpoint
+        ? `${apiBase}/api/payments/create-order-and-pay`
+        : `${apiBase}/api/payments/create-payment`;
+
+      const body = useOrderEndpoint
+        ? {
+            sourceId: result.token,
+            lineItems,
+            ...(buyerEmail ? { buyerEmail } : {}),
+          }
+        : {
+            sourceId: result.token,
+            amountCents,
+            ...(note ? { note } : {}),
+            ...(buyerEmail ? { buyerEmailAddress: buyerEmail } : {}),
+          };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sourceId: result.token,
-          amountCents,
-          ...(note ? { note } : {}),
-          ...(buyerEmail ? { buyerEmailAddress: buyerEmail } : {}),
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -129,7 +151,6 @@ export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSucc
 
   return (
     <div className="rounded-2xl border border-white/10 bg-card p-6 space-y-5 w-full max-w-md mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <CreditCard size={18} className="text-primary" />
@@ -138,7 +159,6 @@ export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSucc
         <span className="font-bold text-lg">{formatUSD(amountCents)}</span>
       </div>
 
-      {/* Square card container */}
       <div className="space-y-2">
         <label className="text-xs text-muted-foreground uppercase tracking-wider">Card details</label>
         <div ref={cardContainerRef} id="square-card-container" className="min-h-[90px]" />
@@ -154,7 +174,6 @@ export function SquarePaymentForm({ amountCents, label, note, buyerEmail, onSucc
         <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{errorMsg}</p>
       )}
 
-      {/* Actions */}
       <div className="flex flex-col gap-2">
         <button
           type="button"

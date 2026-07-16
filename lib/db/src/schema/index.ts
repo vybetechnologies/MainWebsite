@@ -22,3 +22,4 @@ export * from "./booking-requests";
 export * from "./job-listings";
 export * from "./job-applications";
 export * from "./email-opt-outs";
+export * from "./marketplace-items";

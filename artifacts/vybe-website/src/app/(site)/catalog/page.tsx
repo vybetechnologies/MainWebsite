@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import CatalogContent from './catalog-content';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Shop | VYBE Technologies',
-  description: 'Browse VYBE Technologies products and services. Add items to your cart and check out securely with Square.',
-};
+// /catalog is now /shop — redirect automatically.
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function CatalogPage() {
-  return <CatalogContent />;
+export default function CatalogRedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace('/shop'); }, [router]);
+  return null;
 }

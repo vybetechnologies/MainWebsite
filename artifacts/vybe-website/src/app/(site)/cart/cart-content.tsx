@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
-import { useAuth } from '@clerk/react';
 import { ShoppingCart, Trash2, Minus, Plus, ArrowRight, Package, CreditCard, X } from 'lucide-react';
 import Link from 'next/link';
-import { SquarePaymentForm, PaymentReceipt } from '@/components/square-payment-form';
+import { SquarePaymentForm, PaymentReceipt, type OrderLineItem } from '@/components/square-payment-form';
+import { resolveApiBaseUrl } from '@/lib/api-base';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -29,16 +29,10 @@ function EmptyState() {
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link
-          href="/products"
+          href="/shop"
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
         >
-          Browse products <ArrowRight size={14} />
-        </Link>
-        <Link
-          href="/catalog"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 text-sm font-medium hover:bg-white/5 transition-colors"
-        >
-          Shop catalog
+          Browse the shop <ArrowRight size={14} />
         </Link>
         <Link
           href="/tech-rescue"
@@ -122,17 +116,33 @@ function CartItemRow({
 function CheckoutModal({
   totalCents,
   buyerEmail,
-  items,
+  cartItems,
   onSuccess,
   onClose,
 }: {
   totalCents: number;
   buyerEmail?: string;
-  items: ReturnType<typeof useCart>['items'];
+  cartItems: ReturnType<typeof useCart>['items'];
   onSuccess: (receiptUrl: string | null) => void;
   onClose: () => void;
 }) {
-  const note = items.map((i) => `${i.name}${i.qty > 1 ? ` x${i.qty}` : ''}`).join(', ');
+  // Build Square order line items for items that came from the marketplace
+  const orderLineItems: OrderLineItem[] = cartItems
+    .filter((i) => i.squareCatalogVariationId && i.price != null)
+    .map((i) => ({
+      catalogVariationId: i.squareCatalogVariationId!,
+      name: i.name,
+      quantity: i.qty,
+      basePriceCents: i.price!,
+    }));
+
+  // Use order endpoint only when ALL priced items are from Square catalog
+  const pricedItems = cartItems.filter((i) => i.price != null);
+  const allFromCatalog =
+    pricedItems.length > 0 &&
+    pricedItems.every((i) => i.squareCatalogVariationId != null);
+
+  const note = cartItems.map((i) => `${i.name}${i.qty > 1 ? ` x${i.qty}` : ''}`).join(', ');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -147,8 +157,9 @@ function CheckoutModal({
         <SquarePaymentForm
           amountCents={totalCents}
           label={`Pay ${formatPrice(totalCents)}`}
-          note={`VYBE order: ${note}`}
+          note={allFromCatalog ? undefined : `VYBE order: ${note}`}
           buyerEmail={buyerEmail}
+          lineItems={allFromCatalog ? orderLineItems : undefined}
           onSuccess={onSuccess}
           onCancel={onClose}
         />
@@ -161,21 +172,26 @@ function CheckoutModal({
 
 export default function CartContent() {
   const { items, removeFromCart, updateQty, clearCart } = useCart();
-  const { user } = (() => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { useUser } = require('@clerk/react') as typeof import('@clerk/react');
-      return useUser();
-    } catch {
-      return { user: null };
-    }
-  })();
+
+  // Read Clerk user safely (SSR-safe; cart page is client-only)
+  let buyerEmail: string | undefined;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useUser } = require('@clerk/react') as typeof import('@clerk/react');
+    // This is a hook call — only valid at top level. Wrapped in try so it
+    // doesn't throw during static export prerender.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { user } = useUser();
+    buyerEmail = user?.primaryEmailAddress?.emailAddress;
+  } catch {
+    buyerEmail = undefined;
+  }
+
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [receiptUrl, setReceiptUrl] = useState<string | null | undefined>(undefined);
 
   const totalCents = items.reduce((sum, i) => sum + (i.price ?? 0) * i.qty, 0);
   const hasPrices = items.some((i) => i.price != null);
-  const buyerEmail = user?.primaryEmailAddress?.emailAddress;
 
   if (items.length === 0) return <EmptyState />;
 
@@ -197,7 +213,7 @@ export default function CartContent() {
         <CheckoutModal
           totalCents={totalCents}
           buyerEmail={buyerEmail}
-          items={items}
+          cartItems={items}
           onSuccess={(url) => { setReceiptUrl(url); setCheckoutOpen(false); clearCart(); }}
           onClose={() => setCheckoutOpen(false)}
         />
