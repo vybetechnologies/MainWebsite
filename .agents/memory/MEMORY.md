@@ -13,4 +13,4 @@
 - [Fly DATABASE_URL trap](fly-database-url.md) — Fly needs DATABASE_URL set explicitly; NEON_DATABASE_URL alone is not enough; lib/db reads DATABASE_URL.
 - [External Clerk on static-export + Fly API](clerk-external-static-export.md) — publishable key committed to clerk-config.ts; ssr:false wrappers on all /staff pages; do NOT re-run Replit Clerk setup.
 - [React Query hooks + next/dynamic crash on static-export](next15-react19-static-export-react-query.md) — useMutation in public forms + next/dynamic(ssr:false) crashes in React 19; use plain API function + setBaseUrl at submit time instead.
-- [Square integration patterns](square-integration.md) — SDK v45 uses BigInt amounts; card.attach() takes a CSS selector; zod+square must be bundled (not external); credentials via /api/config/public endpoint.
+- [Square SDK v45 migration](square-sdk-v45.md) — v45 exports SquareClient/SquareEnvironment (not Client/Environment); all *Api props renamed; result unwrapping removed; list() returns async-iterable Page.

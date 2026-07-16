@@ -29,7 +29,7 @@ router.post(
 
     try {
       const client = getSquareClient();
-      const { result } = await client.paymentsApi.createPayment({
+      const paymentRes = await client.payments.create({
         sourceId,
         idempotencyKey: crypto.randomUUID(),
         amountMoney: { amount: BigInt(amountCents), currency: "USD" },
@@ -38,7 +38,7 @@ router.post(
         ...(buyerEmailAddress ? { buyerEmailAddress } : {}),
       });
 
-      const p = result.payment;
+      const p = paymentRes.payment;
       res.status(200).json({
         paymentId: p?.id,
         status: p?.status,
@@ -89,17 +89,18 @@ router.post(
       const variationIds = lineItems.map((li) => li.catalogVariationId);
 
       // Batch-fetch the variation objects to get their parent Square item IDs
-      const batchRes = await client.catalogApi.batchRetrieveCatalogObjects({
+      const batchRes = await client.catalog.batchGet({
         objectIds: variationIds,
         includeRelatedObjects: false,
       });
 
-      const fetchedObjects = batchRes.result.objects ?? [];
+      const fetchedObjects = batchRes.objects ?? [];
 
       // Build a map: variationId → parentItemId
+      // Narrow to ITEM_VARIATION so TypeScript can access itemVariationData
       const variationToItemId = new Map<string, string>();
       for (const obj of fetchedObjects) {
-        if (obj.id && obj.itemVariationData?.itemId) {
+        if (obj.type === "ITEM_VARIATION" && obj.id && obj.itemVariationData?.itemId) {
           variationToItemId.set(obj.id, obj.itemVariationData.itemId);
         }
       }
@@ -137,7 +138,7 @@ router.post(
       }
 
       // ── Step 1: Create a Square Order ────────────────────────────────────────
-      const orderRes = await client.ordersApi.createOrder({
+      const orderRes = await client.orders.create({
         idempotencyKey: crypto.randomUUID(),
         order: {
           locationId: SQUARE_LOCATION_ID,
@@ -149,7 +150,7 @@ router.post(
         },
       });
 
-      const order = orderRes.result.order;
+      const order = orderRes.order;
       if (!order?.id) {
         res.status(500).json({ error: "Failed to create order." });
         return;
@@ -162,7 +163,7 @@ router.post(
         0,
       );
 
-      const paymentRes = await client.paymentsApi.createPayment({
+      const paymentRes = await client.payments.create({
         sourceId,
         idempotencyKey: crypto.randomUUID(),
         amountMoney: {
@@ -174,7 +175,7 @@ router.post(
         ...(buyerEmail ? { buyerEmailAddress: buyerEmail } : {}),
       });
 
-      const p = paymentRes.result.payment;
+      const p = paymentRes.payment;
       res.status(200).json({
         orderId: order.id,
         paymentId: p?.id,

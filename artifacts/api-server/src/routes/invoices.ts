@@ -27,9 +27,15 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const client = getSquareClient();
-      const { result } = await client.invoicesApi.listInvoices(SQUARE_LOCATION_ID);
 
-      const invoices = (result.invoices ?? []).map((inv) => ({
+      // Collect all pages of invoices
+      const allInvoices: import("square").Invoice[] = [];
+      const page = await client.invoices.list({ locationId: SQUARE_LOCATION_ID });
+      for await (const inv of page) {
+        allInvoices.push(inv);
+      }
+
+      const invoices = allInvoices.map((inv) => ({
         id: inv.id,
         invoiceNumber: inv.invoiceNumber,
         status: inv.status,
@@ -70,27 +76,27 @@ router.post(
 
       // 1. Find or create the customer in Square
       let customerId: string;
-      const searchRes = await client.customersApi.searchCustomers({
+      const searchRes = await client.customers.search({
         query: { filter: { emailAddress: { exact: customerEmail } } },
       });
 
-      if (searchRes.result.customers?.length) {
-        customerId = searchRes.result.customers[0].id!;
+      if (searchRes.customers?.length) {
+        customerId = searchRes.customers[0].id!;
       } else {
         const nameParts = customerName.trim().split(/\s+/);
         const givenName = nameParts[0];
         const familyName = nameParts.slice(1).join(" ") || undefined;
-        const createRes = await client.customersApi.createCustomer({
+        const createRes = await client.customers.create({
           givenName,
           ...(familyName ? { familyName } : {}),
           emailAddress: customerEmail,
           idempotencyKey: crypto.randomUUID(),
         });
-        customerId = createRes.result.customer!.id!;
+        customerId = createRes.customer!.id!;
       }
 
       // 2. Create a Square Order with line items
-      const orderRes = await client.ordersApi.createOrder({
+      const orderRes = await client.orders.create({
         idempotencyKey: crypto.randomUUID(),
         order: {
           locationId: SQUARE_LOCATION_ID,
@@ -106,10 +112,10 @@ router.post(
         },
       });
 
-      const orderId = orderRes.result.order!.id!;
+      const orderId = orderRes.order!.id!;
 
       // 3. Create the invoice referencing the order
-      const invoiceRes = await client.invoicesApi.createInvoice({
+      const invoiceRes = await client.invoices.create({
         idempotencyKey: crypto.randomUUID(),
         invoice: {
           locationId: SQUARE_LOCATION_ID,
@@ -127,16 +133,17 @@ router.post(
         },
       });
 
-      const invoiceId = invoiceRes.result.invoice!.id!;
-      const invoiceVersion = invoiceRes.result.invoice!.version!;
+      const invoiceId = invoiceRes.invoice!.id!;
+      const invoiceVersion = invoiceRes.invoice!.version!;
 
       // 4. Publish (sends email to customer)
-      const publishRes = await client.invoicesApi.publishInvoice(invoiceId, {
+      const publishRes = await client.invoices.publish({
+        invoiceId,
         version: invoiceVersion,
         idempotencyKey: crypto.randomUUID(),
       });
 
-      const inv = publishRes.result.invoice;
+      const inv = publishRes.invoice;
       res.status(201).json({
         invoiceId: inv?.id,
         invoiceNumber: inv?.invoiceNumber,

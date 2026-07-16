@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { eq, asc } from "drizzle-orm";
 import { db, marketplaceItemsTable } from "@workspace/db";
 import { z } from "zod";
+import type { CatalogObject } from "square";
 import { getSquareClient, moneyToNumber } from "../lib/square-client";
 import { requireStaffAuth } from "../lib/staff-auth";
 
@@ -27,13 +28,12 @@ interface SquareCatalogItem {
 async function fetchSquareCatalogItems(): Promise<SquareCatalogItem[]> {
   const client = getSquareClient();
 
-  // Fetch items + categories in one call
-  const { result } = await client.catalogApi.listCatalog(
-    undefined,
-    "ITEM,CATEGORY",
-  );
-
-  const objects = result.objects ?? [];
+  // Paginate through all catalog items + categories
+  const objects: CatalogObject[] = [];
+  const page = await client.catalog.list({ types: "ITEM,CATEGORY" });
+  for await (const obj of page) {
+    objects.push(obj);
+  }
 
   // Build category name map
   const categoryMap = new Map<string, string>();
@@ -54,7 +54,8 @@ async function fetchSquareCatalogItems(): Promise<SquareCatalogItem[]> {
         imageIds: obj.itemData?.imageIds ?? [],
         categoryName: catId ? (categoryMap.get(catId) ?? null) : null,
         variations: (obj.itemData?.variations ?? [])
-          .filter((v) => v.isDeleted !== true)
+          .filter((v): v is CatalogObject.ItemVariation =>
+            v.type === "ITEM_VARIATION" && v.isDeleted !== true)
           .map((v) => ({
             id: v.id!,
             name: v.itemVariationData?.name ?? "Regular",
@@ -172,25 +173,30 @@ router.patch(
       return;
     }
 
-    const squareItemId = req.params.id;
+    const squareItemId = req.params.id as string;
     const { visible, displayOrder } = parsed.data;
 
     try {
+      const now = new Date();
+      const setValues: {
+        visible?: boolean;
+        displayOrder?: number;
+        updatedAt: Date;
+      } = { updatedAt: now };
+      if (visible !== undefined) setValues.visible = visible;
+      if (displayOrder !== undefined) setValues.displayOrder = displayOrder;
+
       await db
         .insert(marketplaceItemsTable)
         .values({
           squareItemId,
           visible: visible ?? false,
           displayOrder: displayOrder ?? 0,
-          updatedAt: new Date(),
+          updatedAt: now,
         })
         .onConflictDoUpdate({
           target: marketplaceItemsTable.squareItemId,
-          set: {
-            ...(visible !== undefined ? { visible } : {}),
-            ...(displayOrder !== undefined ? { displayOrder } : {}),
-            updatedAt: new Date(),
-          },
+          set: setValues,
         });
 
       res.json({ ok: true });

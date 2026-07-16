@@ -1,10 +1,10 @@
-import { Client, Environment } from "square";
+import { SquareClient, SquareEnvironment } from "square";
 
 /** Always create a fresh client — never cache it (token may rotate). */
-export function getSquareClient(): Client {
-  return new Client({
-    accessToken: process.env["SQUARE_ACCESS_TOKEN"]!,
-    environment: Environment.Production,
+export function getSquareClient(): SquareClient {
+  return new SquareClient({
+    token: process.env["SQUARE_ACCESS_TOKEN"]!,
+    environment: SquareEnvironment.Production,
   });
 }
 

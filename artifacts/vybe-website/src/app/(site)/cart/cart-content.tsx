@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useUser } from '@clerk/react';
 import { useCart } from '@/lib/cart-context';
 import { ShoppingCart, Trash2, Minus, Plus, ArrowRight, Package, CreditCard, X } from 'lucide-react';
 import Link from 'next/link';
@@ -173,19 +174,10 @@ function CheckoutModal({
 export default function CartContent() {
   const { items, removeFromCart, updateQty, clearCart } = useCart();
 
-  // Read Clerk user safely (SSR-safe; cart page is client-only)
-  let buyerEmail: string | undefined;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useUser } = require('@clerk/react') as typeof import('@clerk/react');
-    // This is a hook call — only valid at top level. Wrapped in try so it
-    // doesn't throw during static export prerender.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { user } = useUser();
-    buyerEmail = user?.primaryEmailAddress?.emailAddress;
-  } catch {
-    buyerEmail = undefined;
-  }
+  // CartPage mounts this component client-side only (mounted guard in page.tsx),
+  // so useUser() is safe to call unconditionally here.
+  const { user } = useUser();
+  const buyerEmail = user?.primaryEmailAddress?.emailAddress;
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [receiptUrl, setReceiptUrl] = useState<string | null | undefined>(undefined);
