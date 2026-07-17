@@ -12,6 +12,7 @@ import catalogRouter from "./catalog";
 import invoicesRouter from "./invoices";
 import unsubscribeRouter from "./unsubscribe";
 import partnersRouter from "./partners";
+import newsroomRouter from "./newsroom";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(catalogRouter);
 router.use(invoicesRouter);
 router.use(unsubscribeRouter);
 router.use(partnersRouter);
+router.use(newsroomRouter);
 
 export default router;
