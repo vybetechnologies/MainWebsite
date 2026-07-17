@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 80" fill="none">
+  <!-- Shield icon -->
+  <path d="M28 12 L48 12 L48 38 C48 50 38 58 28 62 C18 58 8 50 8 38 L8 12 Z" fill="#ED1C24"/>
+  <path d="M22 34 L27 39 L38 28" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Bitdefender text -->
+  <text x="60" y="46" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#1A1A2E" letter-spacing="-0.3">Bitdefender</text>
+</svg>

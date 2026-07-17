@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { startPageViewCleanupJob } from "./jobs/pageViewCleanup";
 import { validateSquareCredentials } from "./lib/square-client";
+import { seedPartnersIfEmpty } from "./routes/partners";
 
 const rawPort = process.env["PORT"];
 
@@ -30,5 +31,9 @@ app.listen(port, (err) => {
   // immediately. Square routes return 503 until this resolves successfully.
   validateSquareCredentials().catch((err) => {
     logger.error({ err }, "Unexpected error during Square credential validation");
+  });
+
+  seedPartnersIfEmpty().catch((err) => {
+    logger.error({ err }, "Unexpected error during partners seed");
   });
 });

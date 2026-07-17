@@ -14,6 +14,8 @@ const PARTNERS = [
   { name: "Stripe", logo: "/partners/stripe.svg" },
   { name: "Wave Advisors", logo: "/partners/wave.svg" },
   { name: "Ooma Office", logo: "/partners/ooma.svg" },
+  { name: "Bitdefender", logo: "/partners/bitdefender.svg" },
+  { name: "SentinelOne", logo: "/partners/sentinelone.svg" },
 ];
 
 export function Partners() {

@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser, useClerk, Show } from '@clerk/react';
-import { LayoutDashboard, Inbox, BarChart2, LogOut, Briefcase, ClipboardList, Receipt, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Inbox, BarChart2, LogOut, Briefcase, ClipboardList, Receipt, ShoppingBag, Handshake } from 'lucide-react';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -18,6 +18,7 @@ const NAV = [
   { href: '/staff/analytics', label: 'Analytics', icon: BarChart2, exact: false },
   { href: '/staff/invoices', label: 'Invoices', icon: Receipt, exact: false },
   { href: '/staff/marketplace', label: 'Marketplace', icon: ShoppingBag, exact: false },
+  { href: '/staff/partners', label: 'Partners', icon: Handshake, exact: false },
 ];
 
 // ── Hooks ──────────────────────────────────────────────────────────────────────
